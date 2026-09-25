@@ -176,6 +176,92 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
             }
         )
 
+    # =========================================================================
+    # INTERNAL CHUNK-LEVEL STORAGE APIS (USED BY GATEWAY & REPAIR WORKERS)
+    # =========================================================================
+
+    @app.get("/v1/node/health")
+    async def node_health() -> dict:
+        """Return storage node identity and health status."""
+        return {
+            "node_id": os.getenv("NODE_ID", "store-local"),
+            "region": os.getenv("REGION", "us-east-1"),
+            "zone": os.getenv("ZONE", "us-east-1a"),
+            "status": "active",
+            "data_dir": str(cfg.data_dir),
+            "chunks_dir_exists": storage.chunks_dir.is_dir(),
+        }
+
+    @app.put("/v1/chunks/{bucket}/{version_id}/{chunk_index:int}", status_code=status.HTTP_201_CREATED)
+    async def put_chunk(
+        bucket: str,
+        version_id: str,
+        chunk_index: int,
+        request: Request,
+        expected_sha256: Optional[str] = Header(None, alias="X-Expected-SHA256"),
+    ) -> dict:
+        """Atomically persist a single chunk on this storage node."""
+        data = await request.body()
+        try:
+            chunk_info = storage.write_chunk(
+                bucket=bucket,
+                version_id=version_id,
+                chunk_index=chunk_index,
+                data=data,
+                expected_sha256=expected_sha256,
+            )
+        except ChecksumMismatchError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+        return {
+            "chunk_id": chunk_info.chunk_id,
+            "chunk_index": chunk_info.chunk_index,
+            "sha256": chunk_info.sha256,
+            "size_bytes": chunk_info.size_bytes,
+        }
+
+    @app.get("/v1/chunks/{bucket}/{version_id}/{chunk_index:int}")
+    async def get_chunk(
+        bucket: str,
+        version_id: str,
+        chunk_index: int,
+        expected_sha256: Optional[str] = Header(None, alias="X-Expected-SHA256"),
+    ) -> Response:
+        """Retrieve chunk bytes after verifying SHA-256 integrity."""
+        # If expected_sha256 is not sent in header, try reading without expected check or verify against file
+        chunk_path = storage._chunk_path(bucket, version_id, chunk_index)
+        if not chunk_path.is_file():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chunk not found")
+
+        try:
+            if expected_sha256:
+                data = storage.read_chunk(bucket, version_id, chunk_index, expected_sha256)
+            else:
+                with open(chunk_path, "rb") as f:
+                    data = f.read()
+        except CorruptedChunkError as exc:
+            raise HTTPException(status_code=status.HTTP_410_GONE, detail=str(exc))
+        except ChunkNotFoundError:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chunk not found")
+
+        return PlainResponse(content=data, media_type="application/octet-stream")
+
+    @app.head("/v1/chunks/{bucket}/{version_id}/{chunk_index:int}")
+    async def head_chunk(bucket: str, version_id: str, chunk_index: int) -> Response:
+        """Check if chunk exists on this storage node."""
+        chunk_path = storage._chunk_path(bucket, version_id, chunk_index)
+        if not chunk_path.is_file():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        return PlainResponse(headers={"Content-Length": str(chunk_path.stat().st_size)})
+
+    @app.delete("/v1/chunks/{bucket}/{version_id}/{chunk_index:int}", status_code=status.HTTP_204_NO_CONTENT)
+    async def delete_chunk(bucket: str, version_id: str, chunk_index: int) -> Response:
+        """Remove chunk from disk (used by GC and rebalance)."""
+        chunk_path = storage._chunk_path(bucket, version_id, chunk_index)
+        if chunk_path.is_file():
+            chunk_path.unlink()
+        return PlainResponse(status_code=status.HTTP_204_NO_CONTENT)
+
     @app.get("/v1/objects/{bucket}/{key:path}")
     async def get_object(bucket: str, key: str) -> Response:
         """

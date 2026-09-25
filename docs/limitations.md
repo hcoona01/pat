@@ -27,8 +27,9 @@
 - **Production Contrast**: Production object engines (such as Ceph BlueStore or MinIO) interact directly with block devices or bypass POSIX kernel caches using direct I/O (O_DIRECT) and asynchronous I/O (io_uring).
 
 ### 1.7 Current Phase: Single-Node Baseline (No Fault Tolerance Yet)
-- **Status**: The metadata consensus cluster is fully operational as a 3-node Raft cluster (`vault_core/metadata_raft.py`, `apps/metadata_node`), verified with leader election, follower partition recovery, leader loss re-election, CAS conflict rejection, and tombstone propagation.
-- **Limitation**: **Multi-node storage data replication has not yet been connected to the Raft metadata cluster.** Storage nodes currently operate independently. Coordinated distributed writes (Phase 5) will bind the gateway, storage nodes, and Raft consensus together.
+### 1.7 Current Phase: Replicated Multi-Node Cluster (Hot & Durable Operational)
+- **Status**: The cluster replication engine connects the API Gateway, 3-Node Raft metadata cluster, 4-tier HRW placement engine, and 6 independent storage nodes across 3 availability zones. Replicated policies (`hot` [3x, $W=2$] and `durable` [4x, $W=3$]) are fully functional and verified under storage node failure, quorum aborts, and concurrent workloads.
+- **Limitation**: **Erasure coding (`archive` policy $4+2$) and active background repair workers** are scheduled for subsequent phases.
 
 ---
 
@@ -36,12 +37,13 @@
 
 | Requirement Category | Specified Capability | Implementation Status | Evidence / Notes |
 | :--- | :--- | :--- | :--- |
+| **Storage Engine & Replication** | 6 nodes across 3 zones, Hot & Durable write quorums, fault survival | ✅ Complete | Verified in `tests/integration/test_cluster_replication.py` (5/5 passed: node crash, quorum abort, multi-zone) |
 | **Metadata Consensus** | 3-Node Raft cluster, CAS logical versions, leader election, partitions | ✅ Complete | Verified in `tests/integration/test_metadata_raft.py` (7/7 passed: election, CAS 409, partition recovery, leader loss) |
-| **Single-Node Core Engine** | Streaming PUT/GET/HEAD/DELETE, 8 MiB chunks, SHA-256, SQLite WAL, Idempotency | ✅ Complete | Verified in `tests/integration/test_single_node.py` (7/7 passed, including 128 MiB stream) |
-| **Durability Policies** | `hot` (3x), `durable` (4x), `archive` (4+2 EC), quorum math | ✅ Complete | Verified in `tests/unit/test_placement.py` (policy validation, quorum bounds) |
 | **Placement Engine** | Deterministic Rendezvous HRW across regions & zones | ✅ Complete | Verified in `tests/unit/test_placement.py` (9/9 passed, 4-tier diversity, stability) |
-| **Storage Engine** | 6 nodes, independent SQLite + chunks | 🔄 In Progress (Topology defined) | Single-node baseline operational; cluster rollout next |
-| **Integrity & Repair** | SHA-256 validation, quarantine, background repair | 🔄 In Progress (Quarantine active) | Single-node on-read quarantine verified; background scrubber planned |
+| **Durability Policies** | `hot` (3x), `durable` (4x), `archive` (4+2 EC), quorum math | ✅ Complete | Verified in `tests/unit/test_placement.py` (policy validation, quorum bounds) |
+| **Single-Node Core Engine** | Streaming PUT/GET/HEAD/DELETE, 8 MiB chunks, SHA-256, SQLite WAL, Idempotency | ✅ Complete | Verified in `tests/integration/test_single_node.py` (7/7 passed, including 128 MiB stream) |
+| **Erasure Coding (EC)** | Reed–Solomon 4+2 archive policy codec and fragment dispersal | 🔄 In Progress (Design complete) | Scheduled for Phase 7 |
+| **Integrity & Repair** | Periodic full scanner, read-repair, background repair worker | 🔄 In Progress (Quarantine active) | Scheduled for Phase 6 |
 | **Membership & Rebalance**| Admin node addition, HRW migration, verify-before-delete | 🔄 In Progress (Design complete) | Rebalance workflow planned |
-| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (27 unit/int tests pass) | Chaos test scenarios advancing with cluster components |
+| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (32 unit/int tests pass) | Chaos test scenarios advancing with cluster components |
 
