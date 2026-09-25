@@ -8,11 +8,13 @@ from fastapi import FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse, Response as PlainResponse, StreamingResponse
 import httpx
 
+from apps.workers.rebalance_worker import RebalanceWorker
 from apps.workers.repair_worker import RepairWorker
 from vault_core.auth import create_auth_token
 from vault_core.cluster import ClusterConfig, StorageNodeConfig
 from vault_core.erasure_coding import ErasureCodec, InsufficientFragmentsError
 from vault_core.logging_config import StructuredLoggingMiddleware, logger
+from vault_core.rebalance import RebalanceStatus
 from vault_core.manifest import (
     ChunkInfo,
     FragmentInfo,
@@ -69,8 +71,32 @@ class GatewayService:
                 http_client=self.get_http_client(),
                 secret_key=self.settings.secret_key,
             )
+            self.rebalance_worker: Optional[RebalanceWorker] = RebalanceWorker(
+                cluster=self.cluster,
+                metadata_raft=self.metadata_raft,
+                policies=self.policies,
+                http_client=self.get_http_client(),
+                secret_key=self.settings.secret_key,
+            )
+            self.sync_cluster_membership()
         else:
             self.repair_worker = None
+            self.rebalance_worker = None
+
+    def sync_cluster_membership(self) -> None:
+        """Synchronize gateway cluster configuration with Raft-committed membership."""
+        if not self.metadata_raft:
+            return
+        raft_nodes = self.metadata_raft.get_all_storage_nodes()
+        if raft_nodes:
+            self.cluster.storage_nodes = [
+                StorageNodeConfig.model_validate(n) for n in raft_nodes.values()
+            ]
+        elif self.metadata_raft.is_leader():
+            # Seed Raft membership with existing cluster configuration if empty
+            self.metadata_raft.seed_initial_membership(
+                [n.model_dump() for n in self.cluster.storage_nodes]
+            )
 
     def get_http_client(self) -> httpx.AsyncClient:
         if self._http_client is None:
@@ -202,6 +228,138 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
             "backlog_size": backlog,
             "running": gw.repair_worker._running if gw.repair_worker else False,
         }
+
+    # =========================================================================
+    # ADMIN STORAGE MEMBERSHIP & REBALANCE APIS
+    # =========================================================================
+
+    @app.get("/v1/admin/nodes")
+    async def list_nodes() -> dict:
+        """List all storage nodes registered in the cluster."""
+        gw: GatewayService = app.state.gateway
+        gw.sync_cluster_membership()
+        return {
+            "cluster_id": gw.cluster.cluster_id,
+            "total_nodes": len(gw.cluster.storage_nodes),
+            "active_nodes": len(gw.cluster.get_active_storage_nodes()),
+            "distinct_zones": list(gw.cluster.distinct_active_zones()),
+            "nodes": [n.model_dump() for n in gw.cluster.storage_nodes],
+        }
+
+    @app.post("/v1/admin/nodes", status_code=status.HTTP_201_CREATED)
+    async def add_node(node_data: StorageNodeConfig) -> dict:
+        """Add and register a new storage node, committing membership change via Raft."""
+        gw: GatewayService = app.state.gateway
+        if not gw.metadata_raft:
+            raise HTTPException(status_code=503, detail="Metadata consensus unavailable")
+
+        if not node_data.node_id or not node_data.url or not node_data.zone:
+            raise HTTPException(status_code=400, detail="node_id, url, and zone are required")
+
+        try:
+            gw.metadata_raft.add_storage_node(node_data.model_dump())
+        except NotLeaderError as exc:
+            raise HTTPException(status_code=503, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Failed to commit node addition: {exc}")
+
+        gw.cluster.add_storage_node(node_data)
+        logger.info(f"Admin added storage node: {node_data.node_id} ({node_data.url}, zone={node_data.zone})")
+        return node_data.model_dump()
+
+    @app.post("/v1/admin/nodes/{node_id}/activate")
+    async def activate_node(node_id: str) -> dict:
+        """Activate a storage node for traffic, committing change via Raft."""
+        gw: GatewayService = app.state.gateway
+        if not gw.metadata_raft:
+            raise HTTPException(status_code=503, detail="Metadata consensus unavailable")
+
+        node = gw.cluster.get_storage_node(node_id)
+        if not node:
+            raise HTTPException(status_code=404, detail=f"Storage node {node_id} not found")
+
+        try:
+            gw.metadata_raft.update_storage_node(node_id, {"active": True})
+        except NotLeaderError as exc:
+            raise HTTPException(status_code=503, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Failed to commit node activation: {exc}")
+
+        gw.cluster.update_storage_node(node_id, active=True)
+        return {"node_id": node_id, "active": True, "status": "activated"}
+
+    @app.post("/v1/admin/nodes/{node_id}/deactivate")
+    async def deactivate_node(node_id: str) -> dict:
+        """Deactivate a storage node, committing change via Raft."""
+        gw: GatewayService = app.state.gateway
+        if not gw.metadata_raft:
+            raise HTTPException(status_code=503, detail="Metadata consensus unavailable")
+
+        node = gw.cluster.get_storage_node(node_id)
+        if not node:
+            raise HTTPException(status_code=404, detail=f"Storage node {node_id} not found")
+
+        try:
+            gw.metadata_raft.update_storage_node(node_id, {"active": False})
+        except NotLeaderError as exc:
+            raise HTTPException(status_code=503, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Failed to commit node deactivation: {exc}")
+
+        gw.cluster.update_storage_node(node_id, active=False)
+        return {"node_id": node_id, "active": False, "status": "deactivated"}
+
+    @app.delete("/v1/admin/nodes/{node_id}")
+    async def remove_node(node_id: str, force: bool = False) -> dict:
+        """
+        Safely remove a storage node from cluster membership via Raft.
+        Validates that removing the node does not leave the cluster with fewer than 3 active zones.
+        """
+        gw: GatewayService = app.state.gateway
+        if not gw.metadata_raft:
+            raise HTTPException(status_code=503, detail="Metadata consensus unavailable")
+
+        node = gw.cluster.get_storage_node(node_id)
+        if not node:
+            raise HTTPException(status_code=404, detail=f"Storage node {node_id} not found")
+
+        if not force:
+            remaining_active = [n for n in gw.cluster.get_active_storage_nodes() if n.node_id != node_id]
+            remaining_zones = {n.zone for n in remaining_active}
+            if len(remaining_zones) < 3 and len(gw.cluster.get_active_storage_nodes()) > 3:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Cannot remove node {node_id}: would leave cluster with only {len(remaining_zones)} zones (minimum 3 required)"
+                )
+
+        try:
+            gw.metadata_raft.remove_storage_node(node_id)
+        except NotLeaderError as exc:
+            raise HTTPException(status_code=503, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=f"Failed to commit node removal: {exc}")
+
+        gw.cluster.remove_storage_node(node_id)
+        return {"node_id": node_id, "status": "removed"}
+
+    @app.post("/v1/admin/rebalance", status_code=status.HTTP_202_ACCEPTED)
+    async def trigger_rebalance(rate_limit: Optional[float] = None) -> dict:
+        """Trigger background rebalancing to align data placement with current topology."""
+        gw: GatewayService = app.state.gateway
+        if not gw.rebalance_worker:
+            raise HTTPException(status_code=503, detail="Rebalance worker unavailable")
+
+        status_obj = await gw.rebalance_worker.trigger_rebalance(rate_limit=rate_limit)
+        return status_obj.model_dump()
+
+    @app.get("/v1/admin/rebalance")
+    @app.get("/v1/admin/rebalance/status")
+    async def get_rebalance_status() -> dict:
+        """Retrieve progress and completion status of background rebalancing."""
+        gw: GatewayService = app.state.gateway
+        if not gw.rebalance_worker:
+            return RebalanceStatus().model_dump()
+        return gw.rebalance_worker.get_status().model_dump()
 
     @app.get("/v1/cluster/health")
     async def cluster_health() -> dict:

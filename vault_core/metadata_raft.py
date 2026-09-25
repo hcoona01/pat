@@ -354,4 +354,54 @@ class RaftMetadataStateMachine(SyncObj):
             "total_objects": len(self._current_versions),
             "active_objects": sum(1 for v in self._current_versions.values() if not v["is_tombstone"]),
             "tombstoned_objects": sum(1 for v in self._current_versions.values() if v["is_tombstone"]),
+            "storage_nodes_count": len(self._membership),
         }
+
+    # =========================================================================
+    # MEMBERSHIP CONSENSUS API (COMMITTED ONLY THROUGH RAFT CONSENSUS)
+    # =========================================================================
+
+    def add_storage_node(self, node_info: dict, timeout: float = 3.0) -> dict:
+        """Register a new storage node in Raft metadata."""
+        if not self.is_leader():
+            raise NotLeaderError(self.get_leader_address())
+        node_id = node_info["node_id"]
+        try:
+            res = self._apply_membership_update(node_id, node_info, action="add", sync=True, timeout=timeout)
+        except Exception as exc:
+            raise RaftQuorumError(f"Failed to commit node addition through Raft quorum: {exc}") from exc
+        return res
+
+    def update_storage_node(self, node_id: str, updates: dict, timeout: float = 3.0) -> dict:
+        """Update an existing storage node configuration in Raft metadata."""
+        if not self.is_leader():
+            raise NotLeaderError(self.get_leader_address())
+        current = dict(self._membership.get(node_id, {}))
+        if not current:
+            current = {"node_id": node_id}
+        current.update(updates)
+        try:
+            res = self._apply_membership_update(node_id, current, action="update", sync=True, timeout=timeout)
+        except Exception as exc:
+            raise RaftQuorumError(f"Failed to commit node update through Raft quorum: {exc}") from exc
+        return res
+
+    def remove_storage_node(self, node_id: str, timeout: float = 3.0) -> dict:
+        """Remove a storage node from Raft metadata."""
+        if not self.is_leader():
+            raise NotLeaderError(self.get_leader_address())
+        try:
+            res = self._apply_membership_update(node_id, {}, action="remove", sync=True, timeout=timeout)
+        except Exception as exc:
+            raise RaftQuorumError(f"Failed to commit node removal through Raft quorum: {exc}") from exc
+        return res
+
+    def get_all_storage_nodes(self) -> Dict[str, dict]:
+        """Return all committed storage nodes from Raft metadata."""
+        return dict(self._membership)
+
+    def seed_initial_membership(self, storage_nodes: List[dict], timeout: float = 3.0) -> None:
+        """Seed initial cluster membership if empty in Raft."""
+        if not self._membership and self.is_leader():
+            for node in storage_nodes:
+                self._apply_membership_update(node["node_id"], node, action="add", sync=True, timeout=timeout)

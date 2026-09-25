@@ -69,3 +69,33 @@ class ClusterConfig(BaseModel):
     def distinct_active_regions(self) -> Set[str]:
         """Set of unique regions populated by active storage nodes."""
         return {node.region for node in self.get_active_storage_nodes()}
+
+    def add_storage_node(self, node: StorageNodeConfig) -> None:
+        """Add or update a storage node in the cluster configuration."""
+        for i, existing in enumerate(self.storage_nodes):
+            if existing.node_id == node.node_id:
+                self.storage_nodes[i] = node
+                return
+        self.storage_nodes.append(node)
+
+    def update_storage_node(
+        self,
+        node_id: str,
+        active: Optional[bool] = None,
+        capacity_weight: Optional[float] = None,
+    ) -> Optional[StorageNodeConfig]:
+        """Update active status or capacity weight of a storage node."""
+        node = self.get_storage_node(node_id)
+        if not node:
+            return None
+        if active is not None:
+            node.active = active
+        if capacity_weight is not None:
+            node.capacity_weight = capacity_weight
+        return node
+
+    def remove_storage_node(self, node_id: str) -> bool:
+        """Remove a storage node from the cluster configuration."""
+        initial_len = len(self.storage_nodes)
+        self.storage_nodes = [n for n in self.storage_nodes if n.node_id != node_id]
+        return len(self.storage_nodes) < initial_len

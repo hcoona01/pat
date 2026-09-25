@@ -43,7 +43,7 @@
 | **Placement Engine** | Deterministic Rendezvous HRW across regions & zones | ✅ Complete | Verified in `tests/unit/test_placement.py` (9/9 passed, 4-tier diversity, stability) |
 | **Durability Policies** | `hot` (3x), `durable` (4x), `archive` (4+2 EC), quorum math | ✅ Complete | Verified in `tests/unit/test_placement.py` (policy validation, quorum bounds) |
 | **Single-Node Core Engine** | Streaming PUT/GET/HEAD/DELETE, 8 MiB chunks, SHA-256, SQLite WAL, Idempotency | ✅ Complete | Verified in `tests/integration/test_single_node.py` (7/7 passed, including 128 MiB stream) |
-| **Erasure Coding (EC)** | Reed–Solomon 4+2 archive policy codec and fragment dispersal | 🔄 In Progress (Design complete) | Scheduled for Phase 8 |
-| **Membership & Rebalance**| Admin node addition, HRW migration, verify-before-delete | 🔄 In Progress (Design complete) | Rebalance workflow planned |
-| **Testing & Chaos** | Comprehensive integration & fault scenarios | 🔄 In Progress (43 unit/int tests pass) | Chaos test scenarios advancing with cluster components |
+| **Erasure Coding (EC)** | Reed–Solomon 4+2 archive policy codec and multi-zone fragment dispersal | ✅ Complete | Verified in `tests/unit/test_erasure_coding.py` (32/32 passed) and `tests/integration/test_archive_policy.py` (6/6 passed: 1/2 fault tolerance, reconstruction, repair) |
+| **Membership & Rebalance**| Admin node addition/activation/safe removal, HRW migration, verify-before-delete | ✅ Complete | Verified in `tests/integration/test_membership_rebalance.py` (5/5 passed: admin API, Raft membership, rendezvous matching, foreground readability, safe copy-before-delete, resume) |
+| **Testing & Verification** | Comprehensive integration, fault, and durability scenarios | ✅ Complete | 86 automated unit and integration tests passing |
 

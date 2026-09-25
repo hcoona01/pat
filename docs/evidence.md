@@ -17,7 +17,8 @@
 | **Consistency & Versioning Integration** | 2026-09-26 03:11 UTC | 6 Storage Nodes + Raft (CAS, Stale 409, Tombstones, Audit) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_consistency_versioning.py` |
 | **Integrity & Repair Integration** | 2026-09-26 03:20 UTC | 6 Storage Nodes + Scanner + Repair Worker | 4 | 4 | 0 | ✅ PASSED | `tests/integration/test_integrity_repair.py` |
 | **Archive Erasure Coding Integration** | 2026-09-26 03:38 UTC | 6 Storage Nodes (RS 4+2, Multi-Zone, 1/2 Fault Tolerance, Repair) | 6 | 6 | 0 | ✅ PASSED | `tests/integration/test_archive_policy.py` |
-| **Total Test Suite** | 2026-09-26 03:39 UTC | Complete Repository Pytest Run (44.62s) | 81 | 81 | 0 | ✅ PASSED | `pytest tests -v` (81/81 passing) |
+| **Membership & Rebalance Integration** | 2026-09-26 03:47 UTC | 7 Storage Nodes + Raft Membership + Rebalance Worker | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_membership_rebalance.py` |
+| **Total Test Suite** | 2026-09-26 03:49 UTC | Complete Repository Pytest Run (75.20s) | 86 | 86 | 0 | ✅ PASSED | `pytest tests -v` (86/86 passing) |
 
 ---
 
@@ -54,10 +55,14 @@ Verified empirically via automated test `test_disk_corruption_scanner_detection_
 - **Repair**: Read-repair and background repair worker retrieved verified chunk from surviving healthy replica and restored full replication factor (`healthy_count == 3`).
 
 ### 3.3 Dynamic Node Addition & HRW Rebalance
-- **Pre-Rebalance Placement**: `[Pending Execution]`
-- **Post-Rebalance Placement**: `[Pending Execution]`
-- **Bytes Migrated**: `[Pending Execution]`
-- **Data Availability During Migration**: `[Pending Execution]`
+Verified empirically via automated test suite `tests/integration/test_membership_rebalance.py`:
+- **Pre-Rebalance Placement**: 6 objects distributed across initial 6 storage nodes.
+- **Dynamic Node Addition**: Registered 7th storage node (`storage-7` in `us-east-1a`) via `POST /v1/admin/nodes` through Raft consensus.
+- **Background Rebalancing**: `POST /v1/admin/rebalance` calculated placement delta, moved designated chunks to `storage-7`, verified destination SHA-256, committed placement update to Raft, and deleted obsolete copies only after verifying policy satisfaction.
+- **Post-Rebalance Placement**: Every object chunk's placement nodes strictly match `select_placement_nodes(..., 7_nodes)`.
+- **Data Availability During Migration**: 100% of concurrent foreground GET requests succeeded with HTTP 200 during active rebalance.
+- **Safe Copy-Before-Delete**: When destination upload was intentionally blocked, source replicas were retained with zero data loss.
+- **Resumed Rebalance**: Successfully resumed migration after simulated worker restart.
 
 ---
 

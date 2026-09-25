@@ -97,6 +97,43 @@ IDEMPOTENT_HITS_TOTAL = Counter(
 )
 
 
+# Rebalance worker metrics
+REBALANCE_QUEUED_TOTAL = Gauge(
+    "vault_rebalance_queued_tasks",
+    "Current number of chunk migration tasks queued for rebalancing"
+)
+
+REBALANCE_COPIED_TOTAL = Counter(
+    "vault_rebalance_copied_total",
+    "Total number of chunks copied during rebalance operations"
+)
+
+REBALANCE_VERIFIED_TOTAL = Counter(
+    "vault_rebalance_verified_total",
+    "Total number of chunks destination-verified during rebalance operations"
+)
+
+REBALANCE_FAILED_TOTAL = Counter(
+    "vault_rebalance_failed_total",
+    "Total number of failed chunk rebalance attempts"
+)
+
+REBALANCE_BYTES_MOVED_TOTAL = Counter(
+    "vault_rebalance_bytes_moved_total",
+    "Total bytes of chunk data transferred during rebalancing"
+)
+
+REBALANCE_PROGRESS_RATIO = Gauge(
+    "vault_rebalance_progress_ratio",
+    "Rebalance completion percentage ratio from 0.0 to 1.0"
+)
+
+REBALANCE_ACTIVE = Gauge(
+    "vault_rebalance_active",
+    "Whether a rebalance operation is currently running (1 for active, 0 for idle)"
+)
+
+
 def get_latest_metrics() -> tuple[bytes, str]:
     """Generate latest Prometheus metrics formatted bytes and content type."""
     return generate_latest(), CONTENT_TYPE_LATEST
