@@ -13,7 +13,8 @@
 | **Single-Node Integration** | 2026-09-26 02:52 UTC | Python 3.12.12 Local (FastAPI + SQLite WAL) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_single_node.py` |
 | **Raft Consensus Integration** | 2026-09-26 03:00 UTC | 3-Node Raft Cluster (PySyncObj loopback) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_metadata_raft.py` |
 | **Multi-Node Cluster Replication** | 2026-09-26 03:04 UTC | 6 Storage Nodes + Raft (Hot & Durable Quorums) | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_cluster_replication.py` |
-| **Full Cluster Chaos** | *Pending Run* | Docker Network + Faults| - | - | - | ⏳ Pending Phase 9 | `docs/generated-evidence/chaos-test.log` |
+| **Consistency & Versioning Integration** | 2026-09-26 03:11 UTC | 6 Storage Nodes + Raft (CAS, Stale 409, Tombstones, Audit) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_consistency_versioning.py` |
+| **Total Test Suite** | 2026-09-26 03:11 UTC | Complete Repository Pytest Run (34.59s) | 39 | 39 | 0 | ✅ PASSED | `pytest tests -v` (39/39 passing) |
 
 ---
 

@@ -12,7 +12,13 @@ import httpx
 from vault_core.auth import create_auth_token
 from vault_core.cluster import ClusterConfig, StorageNodeConfig
 from vault_core.logging_config import StructuredLoggingMiddleware, logger
-from vault_core.manifest import ChunkInfo, ObjectManifest
+from vault_core.manifest import (
+    ChunkInfo,
+    ObjectManifest,
+    ReplicaAudit,
+    ReplicaAuditReport,
+    ReplicaState,
+)
 from vault_core.metadata_raft import (
     CASConflictError,
     ManifestNotFoundError,
@@ -203,6 +209,142 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
             "content_hash": manifest.content_hash,
             "chunks": chunk_statuses,
         }
+
+    @app.get("/v1/objects/{bucket}/{key:path}/audit")
+    async def audit_object(bucket: str, key: str) -> dict:
+        """
+        Audit physical replica inventory across storage nodes against the latest committed Raft manifest.
+        Detects HEALTHY, STALE, CORRUPT, MISSING, and UNREACHABLE states.
+        """
+        gw: GatewayService = app.state.gateway
+        if not gw.metadata_raft:
+            raise HTTPException(status_code=503, detail="Metadata consensus unavailable")
+
+        manifest_dict = gw.metadata_raft.get_latest_manifest(bucket, key)
+        if not manifest_dict:
+            raise HTTPException(status_code=404, detail="Object not found or tombstoned")
+
+        manifest = ObjectManifest.model_validate(manifest_dict)
+        audits: List[ReplicaAudit] = []
+
+        for chunk_meta in manifest.chunks:
+            for node_id in chunk_meta.placement_nodes:
+                node = gw.cluster.get_storage_node(node_id)
+                if not node or not node.active:
+                    audits.append(ReplicaAudit(
+                        node_id=node_id,
+                        chunk_index=chunk_meta.chunk_index,
+                        expected_version_id=manifest.version_id,
+                        expected_sha256=chunk_meta.sha256,
+                        state=ReplicaState.UNREACHABLE,
+                        details="Node not registered or marked inactive"
+                    ))
+                    continue
+
+                client = gw.get_http_client()
+                url = f"{node.url}/v1/chunks/{bucket}/{manifest.version_id}/{chunk_meta.chunk_index}"
+                auth_token = create_auth_token(gw.settings.secret_key, node_id="gateway")
+
+                try:
+                    resp = await client.get(url, headers={"X-Vault-Auth-Token": auth_token})
+                    if resp.status_code == 200:
+                        actual_sha = hashlib.sha256(resp.content).hexdigest()
+                        if actual_sha == chunk_meta.sha256:
+                            audits.append(ReplicaAudit(
+                                node_id=node_id,
+                                chunk_index=chunk_meta.chunk_index,
+                                expected_version_id=manifest.version_id,
+                                expected_sha256=chunk_meta.sha256,
+                                state=ReplicaState.HEALTHY,
+                                actual_sha256=actual_sha,
+                            ))
+                        else:
+                            audits.append(ReplicaAudit(
+                                node_id=node_id,
+                                chunk_index=chunk_meta.chunk_index,
+                                expected_version_id=manifest.version_id,
+                                expected_sha256=chunk_meta.sha256,
+                                state=ReplicaState.CORRUPT,
+                                actual_sha256=actual_sha,
+                                details="Checksum mismatch on disk"
+                            ))
+                    elif resp.status_code == 404:
+                        # Check if this node holds an older superseded (stale) version of this chunk
+                        all_versions = gw.metadata_raft.get_all_versions(bucket, key)
+                        older_versions = [
+                            v for v in all_versions
+                            if v.get("version_id") != manifest.version_id and not v.get("is_tombstone")
+                        ]
+                        has_stale = False
+                        for old_v in older_versions:
+                            old_vid = old_v.get("version_id")
+                            old_url = f"{node.url}/v1/chunks/{bucket}/{old_vid}/{chunk_meta.chunk_index}"
+                            try:
+                                old_resp = await client.head(old_url, headers={"X-Vault-Auth-Token": auth_token})
+                                if old_resp.status_code == 200:
+                                    audits.append(ReplicaAudit(
+                                        node_id=node_id,
+                                        chunk_index=chunk_meta.chunk_index,
+                                        expected_version_id=manifest.version_id,
+                                        expected_sha256=chunk_meta.sha256,
+                                        state=ReplicaState.STALE,
+                                        details=f"Node holds superseded version {old_vid} instead of {manifest.version_id}"
+                                    ))
+                                    has_stale = True
+                                    break
+                            except Exception:
+                                pass
+
+                        if not has_stale:
+                            audits.append(ReplicaAudit(
+                                node_id=node_id,
+                                chunk_index=chunk_meta.chunk_index,
+                                expected_version_id=manifest.version_id,
+                                expected_sha256=chunk_meta.sha256,
+                                state=ReplicaState.MISSING,
+                                details="Chunk not found on node"
+                            ))
+                    elif resp.status_code == 410:
+                        audits.append(ReplicaAudit(
+                            node_id=node_id,
+                            chunk_index=chunk_meta.chunk_index,
+                            expected_version_id=manifest.version_id,
+                            expected_sha256=chunk_meta.sha256,
+                            state=ReplicaState.CORRUPT,
+                            details="Node reported chunk quarantined"
+                        ))
+                    else:
+                        audits.append(ReplicaAudit(
+                            node_id=node_id,
+                            chunk_index=chunk_meta.chunk_index,
+                            expected_version_id=manifest.version_id,
+                            expected_sha256=chunk_meta.sha256,
+                            state=ReplicaState.UNREACHABLE,
+                            details=f"Node returned HTTP {resp.status_code}"
+                        ))
+                except Exception as exc:
+                    audits.append(ReplicaAudit(
+                        node_id=node_id,
+                        chunk_index=chunk_meta.chunk_index,
+                        expected_version_id=manifest.version_id,
+                        expected_sha256=chunk_meta.sha256,
+                        state=ReplicaState.UNREACHABLE,
+                        details=str(exc)
+                    ))
+
+        report = ReplicaAuditReport(
+            bucket=bucket,
+            key=key,
+            version_id=manifest.version_id,
+            logical_version=manifest.logical_version,
+            replicas=audits,
+            healthy_count=sum(1 for a in audits if a.state == ReplicaState.HEALTHY),
+            stale_count=sum(1 for a in audits if a.state == ReplicaState.STALE),
+            corrupt_count=sum(1 for a in audits if a.state == ReplicaState.CORRUPT),
+            missing_count=sum(1 for a in audits if a.state == ReplicaState.MISSING),
+            unreachable_count=sum(1 for a in audits if a.state == ReplicaState.UNREACHABLE),
+        )
+        return report.model_dump()
 
     @app.put("/v1/objects/{bucket}/{key:path}", status_code=status.HTTP_201_CREATED)
     async def put_object(

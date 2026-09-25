@@ -333,6 +333,16 @@ class RaftMetadataStateMachine(SyncObj):
         obj_key = f"{bucket}/{key}"
         return self._manifests.get(obj_key, {}).get(version_id)
 
+    def get_all_versions(self, bucket: str, key: str) -> List[dict]:
+        """Retrieve all versions (including historical and tombstones) for an object key."""
+        obj_key = f"{bucket}/{key}"
+        return list(self._manifests.get(obj_key, {}).values())
+
+    def get_latest_version_record(self, bucket: str, key: str) -> Optional[dict]:
+        """Retrieve the current version pointer record (including tombstone state) for an object key."""
+        obj_key = f"{bucket}/{key}"
+        return self._current_versions.get(obj_key)
+
     def get_cluster_health(self) -> dict:
         """Return status snapshot of this Raft node and consensus state."""
         return {
