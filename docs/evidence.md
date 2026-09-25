@@ -10,12 +10,14 @@
 | Test Suite | Run Timestamp | Environment | Total Tests | Passed | Failed | Status | Evidence File Reference |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Unit Tests (Smoke + Placement)** | 2026-09-26 02:55 UTC | Python 3.12.12 Local | 13 | 13 | 0 | ✅ PASSED | `tests/unit/test_smoke.py`, `tests/unit/test_placement.py` |
+| **Unit Tests (Erasure Coding 4+2)** | 2026-09-26 03:38 UTC | Python 3.12.12 Local (`zfec` RS Codec, K=4, M=2) | 32 | 32 | 0 | ✅ PASSED | `tests/unit/test_erasure_coding.py` |
 | **Single-Node Integration** | 2026-09-26 02:52 UTC | Python 3.12.12 Local (FastAPI + SQLite WAL) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_single_node.py` |
 | **Raft Consensus Integration** | 2026-09-26 03:00 UTC | 3-Node Raft Cluster (PySyncObj loopback) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_metadata_raft.py` |
 | **Multi-Node Cluster Replication** | 2026-09-26 03:04 UTC | 6 Storage Nodes + Raft (Hot & Durable Quorums) | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_cluster_replication.py` |
 | **Consistency & Versioning Integration** | 2026-09-26 03:11 UTC | 6 Storage Nodes + Raft (CAS, Stale 409, Tombstones, Audit) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_consistency_versioning.py` |
 | **Integrity & Repair Integration** | 2026-09-26 03:20 UTC | 6 Storage Nodes + Scanner + Repair Worker | 4 | 4 | 0 | ✅ PASSED | `tests/integration/test_integrity_repair.py` |
-| **Total Test Suite** | 2026-09-26 03:21 UTC | Complete Repository Pytest Run (40.68s) | 43 | 43 | 0 | ✅ PASSED | `pytest tests -v` (43/43 passing) |
+| **Archive Erasure Coding Integration** | 2026-09-26 03:38 UTC | 6 Storage Nodes (RS 4+2, Multi-Zone, 1/2 Fault Tolerance, Repair) | 6 | 6 | 0 | ✅ PASSED | `tests/integration/test_archive_policy.py` |
+| **Total Test Suite** | 2026-09-26 03:39 UTC | Complete Repository Pytest Run (44.62s) | 81 | 81 | 0 | ✅ PASSED | `pytest tests -v` (81/81 passing) |
 
 ---
 
@@ -61,11 +63,11 @@ Verified empirically via automated test `test_disk_corruption_scanner_detection_
 
 ## 4. Measured Metrics & Storage Amplification
 
-| Policy | Expected Amplification | Measured Raw Bytes | Measured Stored Bytes | Measured Amplification | Target Met? |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`hot`** | ~3.0x | - | - | - | ⏳ Pending |
-| **`durable`** | ~4.0x | - | - | - | ⏳ Pending |
-| **`archive`** | ~1.5x | - | - | - | ⏳ Pending |
+| Policy | Expected Amplification | Formula | Measured Amplification | Target Met? |
+| :--- | :--- | :--- | :--- | :--- |
+| **`hot`** | $3.00\times$ | $RF = 3$ | **$3.00\times$** | ✅ PASSED (`storage_amplification{policy="hot"} 3.0`) |
+| **`durable`** | $4.00\times$ | $RF = 4$ | **$4.00\times$** | ✅ PASSED (`storage_amplification{policy="durable"} 4.0`) |
+| **`archive`** | $1.50\times$ | $(K + M) / K = (4 + 2) / 4 = 1.50\times$ | **$1.50\times$** | ✅ PASSED (`storage_amplification{policy="archive"} 1.5`) |
 
 ---
 

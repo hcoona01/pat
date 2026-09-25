@@ -11,9 +11,11 @@ import httpx
 from apps.workers.repair_worker import RepairWorker
 from vault_core.auth import create_auth_token
 from vault_core.cluster import ClusterConfig, StorageNodeConfig
+from vault_core.erasure_coding import ErasureCodec, InsufficientFragmentsError
 from vault_core.logging_config import StructuredLoggingMiddleware, logger
 from vault_core.manifest import (
     ChunkInfo,
+    FragmentInfo,
     ObjectManifest,
     ReplicaAudit,
     ReplicaAuditReport,
@@ -252,6 +254,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
             "version_id": manifest.version_id,
             "logical_version": manifest.logical_version,
             "policy": manifest.policy,
+            "storage_amplification": 1.5 if manifest.policy == "archive" else (4.0 if manifest.policy == "durable" else 3.0),
             "size_bytes": manifest.size_bytes,
             "content_hash": manifest.content_hash,
             "chunks": chunk_statuses,
@@ -262,6 +265,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
         """
         Audit physical replica inventory across storage nodes against the latest committed Raft manifest.
         Detects HEALTHY, STALE, CORRUPT, MISSING, and UNREACHABLE states.
+        Supports both replicated and erasure-coded policies.
         """
         gw: GatewayService = app.state.gateway
         if not gw.metadata_raft:
@@ -275,48 +279,58 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
         audits: List[ReplicaAudit] = []
 
         for chunk_meta in manifest.chunks:
-            for node_id in chunk_meta.placement_nodes:
+            if chunk_meta.is_erasure_coded and chunk_meta.fragments:
+                targets = [
+                    (f.node_id, f.fragment_index, f.sha256)
+                    for f in chunk_meta.fragments
+                ]
+            else:
+                targets = [
+                    (node_id, chunk_meta.chunk_index, chunk_meta.sha256)
+                    for node_id in chunk_meta.placement_nodes
+                ]
+
+            for node_id, c_idx, exp_sha in targets:
                 node = gw.cluster.get_storage_node(node_id)
                 if not node or not node.active:
                     audits.append(ReplicaAudit(
                         node_id=node_id,
-                        chunk_index=chunk_meta.chunk_index,
+                        chunk_index=c_idx,
                         expected_version_id=manifest.version_id,
-                        expected_sha256=chunk_meta.sha256,
+                        expected_sha256=exp_sha,
                         state=ReplicaState.UNREACHABLE,
                         details="Node not registered or marked inactive"
                     ))
                     continue
 
                 client = gw.get_http_client()
-                url = f"{node.url}/v1/chunks/{bucket}/{manifest.version_id}/{chunk_meta.chunk_index}"
+                url = f"{node.url}/v1/chunks/{bucket}/{manifest.version_id}/{c_idx}"
                 auth_token = create_auth_token(gw.settings.secret_key, node_id="gateway")
 
                 try:
                     resp = await client.get(url, headers={"X-Vault-Auth-Token": auth_token})
                     if resp.status_code == 200:
                         actual_sha = hashlib.sha256(resp.content).hexdigest()
-                        if actual_sha == chunk_meta.sha256:
+                        if actual_sha == exp_sha:
                             audits.append(ReplicaAudit(
                                 node_id=node_id,
-                                chunk_index=chunk_meta.chunk_index,
+                                chunk_index=c_idx,
                                 expected_version_id=manifest.version_id,
-                                expected_sha256=chunk_meta.sha256,
+                                expected_sha256=exp_sha,
                                 state=ReplicaState.HEALTHY,
                                 actual_sha256=actual_sha,
                             ))
                         else:
                             audits.append(ReplicaAudit(
                                 node_id=node_id,
-                                chunk_index=chunk_meta.chunk_index,
+                                chunk_index=c_idx,
                                 expected_version_id=manifest.version_id,
-                                expected_sha256=chunk_meta.sha256,
+                                expected_sha256=exp_sha,
                                 state=ReplicaState.CORRUPT,
                                 actual_sha256=actual_sha,
                                 details="Checksum mismatch on disk"
                             ))
                     elif resp.status_code == 404:
-                        # Check if this node holds an older superseded (stale) version of this chunk
                         all_versions = gw.metadata_raft.get_all_versions(bucket, key)
                         older_versions = [
                             v for v in all_versions
@@ -325,15 +339,15 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                         has_stale = False
                         for old_v in older_versions:
                             old_vid = old_v.get("version_id")
-                            old_url = f"{node.url}/v1/chunks/{bucket}/{old_vid}/{chunk_meta.chunk_index}"
+                            old_url = f"{node.url}/v1/chunks/{bucket}/{old_vid}/{c_idx}"
                             try:
                                 old_resp = await client.head(old_url, headers={"X-Vault-Auth-Token": auth_token})
                                 if old_resp.status_code == 200:
                                     audits.append(ReplicaAudit(
                                         node_id=node_id,
-                                        chunk_index=chunk_meta.chunk_index,
+                                        chunk_index=c_idx,
                                         expected_version_id=manifest.version_id,
-                                        expected_sha256=chunk_meta.sha256,
+                                        expected_sha256=exp_sha,
                                         state=ReplicaState.STALE,
                                         details=f"Node holds superseded version {old_vid} instead of {manifest.version_id}"
                                     ))
@@ -345,36 +359,36 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                         if not has_stale:
                             audits.append(ReplicaAudit(
                                 node_id=node_id,
-                                chunk_index=chunk_meta.chunk_index,
+                                chunk_index=c_idx,
                                 expected_version_id=manifest.version_id,
-                                expected_sha256=chunk_meta.sha256,
+                                expected_sha256=exp_sha,
                                 state=ReplicaState.MISSING,
                                 details="Chunk not found on node"
                             ))
                     elif resp.status_code == 410:
                         audits.append(ReplicaAudit(
                             node_id=node_id,
-                            chunk_index=chunk_meta.chunk_index,
+                            chunk_index=c_idx,
                             expected_version_id=manifest.version_id,
-                            expected_sha256=chunk_meta.sha256,
+                            expected_sha256=exp_sha,
                             state=ReplicaState.CORRUPT,
                             details="Node reported chunk quarantined"
                         ))
                     else:
                         audits.append(ReplicaAudit(
                             node_id=node_id,
-                            chunk_index=chunk_meta.chunk_index,
+                            chunk_index=c_idx,
                             expected_version_id=manifest.version_id,
-                            expected_sha256=chunk_meta.sha256,
+                            expected_sha256=exp_sha,
                             state=ReplicaState.UNREACHABLE,
                             details=f"Node returned HTTP {resp.status_code}"
                         ))
                 except Exception as exc:
                     audits.append(ReplicaAudit(
                         node_id=node_id,
-                        chunk_index=chunk_meta.chunk_index,
+                        chunk_index=c_idx,
                         expected_version_id=manifest.version_id,
-                        expected_sha256=chunk_meta.sha256,
+                        expected_sha256=exp_sha,
                         state=ReplicaState.UNREACHABLE,
                         details=str(exc)
                     ))
@@ -456,7 +470,78 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
             except PolicyValidationError as exc:
                 raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
 
-            # 2. Concurrently upload to target nodes
+            # Handle Reed-Solomon Erasure Coding (e.g. 4+2 archive policy)
+            if policy.scheme == PolicyScheme.ERASURE_CODING:
+                codec = ErasureCodec(
+                    data_fragments=policy.data_fragments or 4,
+                    parity_fragments=policy.parity_fragments or 2,
+                )
+                encoded_frags = codec.encode(data_bytes)
+                fragments_info: List[FragmentInfo] = []
+                upload_tasks = []
+
+                for frag_idx, frag_bytes, frag_sha in encoded_frags:
+                    assigned_node = target_nodes[frag_idx]
+                    fragments_info.append(FragmentInfo(
+                        fragment_index=frag_idx,
+                        sha256=frag_sha,
+                        size_bytes=len(frag_bytes),
+                        node_id=assigned_node.node_id,
+                        is_parity=(frag_idx >= codec.k),
+                    ))
+                    upload_tasks.append(
+                        gw.upload_chunk_to_node(
+                            node=assigned_node,
+                            bucket=bucket,
+                            version_id=version_id,
+                            chunk_index=frag_idx,
+                            data=frag_bytes,
+                            expected_sha256=frag_sha,
+                        )
+                    )
+
+                results = await asyncio.gather(*upload_tasks)
+                successful_nodes = [res["node_id"] for res in results if res is not None]
+
+                required_quorum = policy.write_quorum
+                if len(successful_nodes) < required_quorum:
+                    for n_id in successful_nodes:
+                        gw.orphan_candidates.append({
+                            "node_id": n_id,
+                            "bucket": bucket,
+                            "version_id": version_id,
+                            "chunk_index": idx,
+                            "created_at": time.time(),
+                        })
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail=(
+                            f"Archive erasure coding write quorum unavailable for chunk {idx}: "
+                            f"required {required_quorum} fragments, received {len(successful_nodes)} "
+                            f"(targets: {[n.node_id for n in target_nodes]})"
+                        )
+                    )
+
+                for n_id in successful_nodes:
+                    all_written_chunks.append({
+                        "node_id": n_id,
+                        "bucket": bucket,
+                        "version_id": version_id,
+                        "chunk_index": idx,
+                    })
+
+                return ChunkInfo(
+                    chunk_index=idx,
+                    chunk_id=f"{version_id}_{idx}",
+                    sha256=chunk_sha,
+                    size_bytes=len(data_bytes),
+                    placement_nodes=[n.node_id for n in target_nodes],
+                    is_erasure_coded=True,
+                    fragments=fragments_info,
+                    original_chunk_size=len(data_bytes),
+                )
+
+            # 2. Concurrently upload to target nodes (Replication policy)
             upload_tasks = [
                 gw.upload_chunk_to_node(
                     node=node,
@@ -618,10 +703,11 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
         """
         Coordinated distributed read flow:
         1. Resolve latest committed manifest through Raft metadata cluster.
-        2. Concurrently read candidate replicas for each chunk.
+        2. Concurrently read candidate replicas/fragments for each chunk.
         3. Verify cryptographic SHA-256 hash.
-        4. Serve only verified bytes.
-        5. Record failed, missing, or corrupt replicas for repair.
+        4. For archive policy, decode from >= 4 valid fragments and verify final hash.
+        5. Serve only verified data.
+        6. Record failed, missing, or corrupt replicas/fragments for repair.
         """
         gw: GatewayService = app.state.gateway
         if not gw.metadata_raft:
@@ -633,6 +719,136 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
 
         manifest = ObjectManifest.model_validate(manifest_dict)
 
+        # -------------------------------------------------------------
+        # Erasure-Coded Object Reconstruction (Archive Policy)
+        # -------------------------------------------------------------
+        if manifest.policy == "archive" or any(c.is_erasure_coded for c in manifest.chunks):
+            reconstructed_chunks: List[bytes] = []
+            overall_hasher = hashlib.sha256()
+
+            for chunk_meta in manifest.chunks:
+                fragments_info = chunk_meta.fragments or []
+                if not fragments_info:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail=f"Corrupt manifest: missing fragment metadata for chunk {chunk_meta.chunk_index}"
+                    )
+
+                async def fetch_fragment(f_info: FragmentInfo):
+                    node = gw.cluster.get_storage_node(f_info.node_id)
+                    if not node or not node.active:
+                        return f_info.fragment_index, f_info.node_id, None
+                    data = await gw.fetch_chunk_from_node(
+                        node=node,
+                        bucket=bucket,
+                        version_id=manifest.version_id,
+                        chunk_index=f_info.fragment_index,
+                        expected_sha256=f_info.sha256,
+                    )
+                    return f_info.fragment_index, f_info.node_id, data
+
+                fetch_tasks = [fetch_fragment(f) for f in fragments_info]
+                results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
+                valid_fragments: Dict[int, bytes] = {}
+                failed_fragments: List[tuple] = []  # (frag_index, node_id, expected_sha)
+
+                for r in results:
+                    if isinstance(r, Exception):
+                        continue
+                    frag_idx, node_id, data = r
+                    if data is not None:
+                        valid_fragments[frag_idx] = data
+                    else:
+                        target_f = next(f for f in fragments_info if f.fragment_index == frag_idx)
+                        failed_fragments.append((frag_idx, node_id, target_f.sha256))
+
+                # Check if we have at least K=4 valid fragments
+                codec = ErasureCodec(4, 2)
+                if len(valid_fragments) < codec.k:
+                    # Enqueue read repair if repair worker is active
+                    if gw.repair_worker:
+                        for f_idx, node_id, f_sha in failed_fragments:
+                            gw.repair_worker.enqueue_repair(
+                                bucket=bucket,
+                                key=key,
+                                version_id=manifest.version_id,
+                                chunk_index=f_idx,
+                                failed_node_id=node_id,
+                                expected_sha256=f_sha,
+                                surviving_healthy_replicas=len(valid_fragments),
+                                state="corrupt_or_missing",
+                            )
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail=(
+                            f"Archive read failed for chunk {chunk_meta.chunk_index}: "
+                            f"only {len(valid_fragments)} valid fragments available, required at least {codec.k}"
+                        )
+                    )
+
+                # Decode / Reconstruct original chunk data
+                orig_size = chunk_meta.original_chunk_size if chunk_meta.original_chunk_size is not None else chunk_meta.size_bytes
+                try:
+                    reconstructed_chunk = codec.decode(valid_fragments, orig_size)
+                except Exception as exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail=f"Erasure decoding failed for chunk {chunk_meta.chunk_index}: {exc}"
+                    )
+
+                # Verify reconstructed chunk hash
+                chunk_sha = hashlib.sha256(reconstructed_chunk).hexdigest()
+                if chunk_sha != chunk_meta.sha256:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail=f"Reconstructed chunk {chunk_meta.chunk_index} checksum mismatch: expected {chunk_meta.sha256}, got {chunk_sha}"
+                    )
+
+                reconstructed_chunks.append(reconstructed_chunk)
+                overall_hasher.update(reconstructed_chunk)
+
+                # Enqueue missing or corrupt fragments for background read-repair
+                if failed_fragments and gw.repair_worker:
+                    surviving_count = len(valid_fragments)
+                    for f_idx, node_id, f_sha in failed_fragments:
+                        gw.repair_worker.enqueue_repair(
+                            bucket=bucket,
+                            key=key,
+                            version_id=manifest.version_id,
+                            chunk_index=f_idx,
+                            failed_node_id=node_id,
+                            expected_sha256=f_sha,
+                            surviving_healthy_replicas=surviving_count,
+                            state="corrupt_or_missing",
+                        )
+
+            # Do not serve reconstructed data unless the final object hash validates
+            final_hash = overall_hasher.hexdigest()
+            if final_hash != manifest.content_hash:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail=f"Reconstructed object checksum mismatch: expected {manifest.content_hash}, calculated {final_hash}"
+                )
+
+            headers = {
+                "Content-Length": str(manifest.size_bytes),
+                "Content-Type": manifest.content_type,
+                "ETag": f'"{manifest.content_hash}"',
+                "X-Vault-Version-Id": manifest.version_id,
+                "X-Vault-Logical-Version": str(manifest.logical_version),
+                "X-Vault-Policy": manifest.policy,
+            }
+
+            async def ec_streamer():
+                for c_bytes in reconstructed_chunks:
+                    yield c_bytes
+
+            return StreamingResponse(ec_streamer(), media_type=manifest.content_type, headers=headers)
+
+        # -------------------------------------------------------------
+        # Replicated Object Streaming (Hot & Durable Policies)
+        # -------------------------------------------------------------
         async def chunk_streamer() -> AsyncGenerator[bytes, None]:
             for chunk_meta in manifest.chunks:
                 # Find candidate nodes
@@ -701,7 +917,6 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                     asyncio.create_task(evaluate_read_repairs())
 
                 if verified_bytes is None:
-                    # Enqueue for repair
                     gw.repair_backlog.append({
                         "bucket": bucket,
                         "key": key,

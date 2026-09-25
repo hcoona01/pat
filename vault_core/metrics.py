@@ -80,6 +80,16 @@ REPAIR_DURATION_SECONDS = Histogram(
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
 )
 
+# Storage amplification factor by durability policy
+STORAGE_AMPLIFICATION = Gauge(
+    "storage_amplification",
+    "Measured storage amplification ratio by durability policy",
+    ["policy"]
+)
+STORAGE_AMPLIFICATION.labels(policy="archive").set(1.5)
+STORAGE_AMPLIFICATION.labels(policy="hot").set(3.0)
+STORAGE_AMPLIFICATION.labels(policy="durable").set(4.0)
+
 # Idempotency hits
 IDEMPOTENT_HITS_TOTAL = Counter(
     "vault_idempotent_requests_total",

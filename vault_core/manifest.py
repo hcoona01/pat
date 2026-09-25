@@ -41,14 +41,26 @@ class ReplicaAuditReport(BaseModel):
     unreachable_count: int
 
 
+class FragmentInfo(BaseModel):
+    """Metadata describing a single Reed-Solomon erasure coding fragment."""
+    fragment_index: int = Field(..., description="Zero-based fragment index (0..K-1 data, K..M-1 parity)")
+    sha256: str = Field(..., description="Cryptographic SHA-256 hash of this fragment")
+    size_bytes: int = Field(..., description="Size of this fragment in bytes")
+    node_id: str = Field(..., description="Storage node ID holding this fragment")
+    is_parity: bool = Field(default=False, description="True if parity fragment, False if data fragment")
+
+
 class ChunkInfo(BaseModel):
     """Metadata describing a single object chunk or fragment."""
     chunk_index: int = Field(..., description="Zero-based index of this chunk within the object")
     chunk_id: str = Field(..., description="Globally unique chunk identifier")
     sha256: str = Field(..., description="Hexadecimal SHA-256 digest of chunk content")
     size_bytes: int = Field(..., description="Size of chunk in bytes")
-    placement_nodes: List[str] = Field(default_factory=list, description="IDs of storage nodes holding this chunk")
+    placement_nodes: List[str] = Field(default_factory=list, description="IDs of storage nodes holding this chunk or its fragments")
     stored_path: Optional[str] = Field(default=None, description="Local relative path on node if stored locally")
+    is_erasure_coded: bool = Field(default=False, description="Whether this chunk uses Reed-Solomon erasure coding")
+    fragments: Optional[List[FragmentInfo]] = Field(default=None, description="Individual fragments if erasure coded")
+    original_chunk_size: Optional[int] = Field(default=None, description="Unpadded chunk size before EC encoding")
 
 
 class ObjectManifest(BaseModel):

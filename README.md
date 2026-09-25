@@ -100,13 +100,49 @@ archive:
   minimum_distinct_zones: 3
 ```
 
-### Trade-off Comparison
-- **Replication (`hot` & `durable`)**:
-  - *Pros*: Extremely low CPU overhead; ultra-fast reads (first healthy replica responds); straightforward read-repair.
-  - *Cons*: High storage amplification (~3x for `hot`, ~4x for `durable`).
-- **Erasure Coding (`archive` - $4+2$)**:
-  - *Pros*: High storage efficiency (~1.5x amplification before metadata), tolerates losing any 2 of the 6 fragments.
-  - *Cons*: Higher CPU utilization for Galois field matrix multiplication during chunk encoding and reconstruction; reads require coordinating at least 4 nodes.
+archive:
+  scheme: erasure_coding
+  data_fragments: 4
+  parity_fragments: 2
+  minimum_distinct_zones: 3
+```
+
+### Comprehensive Durability Policy Trade-Off Matrix
+
+Vault implements two fundamentally distinct durability paradigms tailored to different workload profiles:
+
+| Architectural Metric | `hot` (Replication Factor 3) | `durable` (Replication Factor 4) | `archive` (Reed–Solomon $4+2$) |
+| :--- | :--- | :--- | :--- |
+| **Durability Scheme** | Multi-Zone Synchronous Replication | Multi-Zone Synchronous Replication | Reed–Solomon Erasure Coding |
+| **Storage Amplification** | **$3.00\times$** (200% storage overhead) | **$4.00\times$** (300% storage overhead) | **$1.50\times$** (50% storage overhead) |
+| **Fault Tolerance (Nodes)** | Tolerates **2 node failures** | Tolerates **3 node failures** | Tolerates **2 node failures** ($N - K = 6 - 4$) |
+| **Zone Separation** | Spans $\ge 3$ distinct availability zones | Spans $\ge 3$ distinct availability zones | Spans $\ge 3$ distinct availability zones |
+| **Write Quorum Requirement** | $W=2$ acknowledgments | $W=3$ acknowledgments | $W=6$ fragment acknowledgments |
+| **Read Quorum Requirement** | $R=1$ (first healthy replica responds) | $R=1$ (first healthy replica responds) | $R=4$ (must collect $\ge 4$ valid fragments) |
+| **Client Read Latency** | **Lowest** (sub-millisecond streaming) | **Lowest** (sub-millisecond streaming) | **Higher** (fan-out gather + RS matrix decode) |
+| **Tail Latency Impact** | Low (hedged concurrent reads) | Minimal (hedged 4-way concurrent reads) | Elevated (straggler penalty across 6 fragment nodes) |
+| **CPU Utilization** | Negligible (pure SHA-256 validation) | Negligible (pure SHA-256 validation) | Moderate ($GF(2^8)$ matrix multiplication via `zfec`) |
+| **Network Write Fanout** | $3\times$ payload across cluster network | $4\times$ payload across cluster network | $1.5\times$ payload distributed into 6 fragments |
+| **Background Repair Cost** | Low (stream 1 surviving chunk) | Low (stream 1 surviving chunk) | Moderate (fetch 4 fragments, decode, re-encode, upload) |
+| **Recommended Workloads** | Active APIs, low-latency objects, hot files | Critical system configs, audit logs, keys | Backups, historical archives, large media, cold tier |
+
+### Deep-Dive: Replication vs. Erasure Coding
+
+1. **Storage Amplification and Cost Efficiency**:
+   - `hot` and `durable` policies duplicate raw chunks identically across 3 or 4 physical storage nodes. While simple and fast, this imposes a severe storage penalty ($3\times$ to $4\times$ raw disk consumption).
+   - `archive` achieves identical fault tolerance to `hot` (both survive losing 2 storage nodes concurrently) while consuming only **$1.50\times$** raw capacity—delivering a **50% hardware cost reduction**.
+
+2. **Read Latency and Straggler Penalty**:
+   - In replication, the API Gateway queries candidate storage nodes concurrently and begins streaming bytes as soon as the *first* healthy replica responds ($R=1$).
+   - In erasure coding, the gateway must receive at least $K=4$ healthy fragments before reconstruction can begin. The read latency is therefore bounded by the *4th fastest* node (the tail latency of the node quorum), plus decoding CPU time.
+
+3. **Bit-Rot Detection and Self-Healing Repair**:
+   - Both policies rely on cryptographic SHA-256 checksums to detect disk bit rot and corrupt fragments.
+   - For replicated chunks, the background `RepairWorker` directly mirrors an intact chunk from another healthy node to the target node.
+   - For archive fragments, the `RepairWorker` gathers any 4 surviving fragments across zones, reconstructs the missing/corrupt fragment using `ErasureCodec.reconstruct_fragment()`, cryptographically validates the regenerated fragment hash against the Raft-committed manifest, and uploads it to restore the full 6-fragment stripe.
+
+4. **Cryptographic Integrity Guarantee Before Delivery**:
+   - As mandated by `PROJECT_RULES.md`, reconstructed archive data is **never served** to clients unless the decoded chunk hash and the overall object SHA-256 hash match the Raft manifest's `content_hash` bit-for-bit. If corrupted beyond repair ($< 4$ surviving fragments), Vault returns HTTP 503 rather than serving corrupt bytes.
 
 ---
 

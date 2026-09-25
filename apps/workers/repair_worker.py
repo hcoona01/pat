@@ -9,6 +9,7 @@ import httpx
 
 from vault_core.auth import create_auth_token
 from vault_core.cluster import ClusterConfig, StorageNodeConfig
+from vault_core.erasure_coding import ErasureCodec
 from vault_core.logging_config import logger
 from vault_core.manifest import ObjectManifest, ReplicaState
 from vault_core.metadata_raft import RaftMetadataStateMachine
@@ -70,6 +71,10 @@ class RepairWorker:
         self._queued_signatures: Set[Tuple[str, str, str, int, str]] = set()
         self._running = False
         self._worker_task: Optional[asyncio.Task] = None
+
+    def queue_size(self) -> int:
+        """Return the current number of pending repair tasks in the queue."""
+        return self._queue.qsize()
 
     def enqueue_repair(
         self,
@@ -134,55 +139,107 @@ class RepairWorker:
                 return True
 
             manifest = ObjectManifest.model_validate(manifest_dict)
-            if task.chunk_index >= len(manifest.chunks):
+            if not manifest.chunks:
                 return False
 
-            chunk_meta = manifest.chunks[task.chunk_index]
-            expected_sha = chunk_meta.sha256
-
-            # 2. Identify destination node
-            target_node = self.cluster.get_storage_node(task.failed_node_id)
-            if not target_node or not target_node.active:
-                # Target node is permanently down or inactive; find alternate active node
-                active_nodes = self.cluster.get_active_storage_nodes()
-                used_nodes = set(chunk_meta.placement_nodes)
-                candidate_alts = [n for n in active_nodes if n.node_id not in used_nodes]
-                if not candidate_alts:
-                    logger.error(f"Cannot repair {task.bucket}/{task.key}: no available alternative nodes")
-                    REPAIR_FAILURE_TOTAL.inc()
-                    return False
-                target_node = candidate_alts[0]
-
-            # 3. Locate healthy source replica
             auth_token = create_auth_token(self.secret_key, node_id="repair-worker")
             source_data: Optional[bytes] = None
 
-            for node_id in chunk_meta.placement_nodes:
-                if node_id == task.failed_node_id:
-                    continue
-                node = self.cluster.get_storage_node(node_id)
-                if not node or not node.active:
-                    continue
+            # Handle Erasure-Coded Object Repair
+            if manifest.policy == "archive" or any(c.is_erasure_coded for c in manifest.chunks):
+                # For archive policy, task.chunk_index is the fragment index (0..5)
+                chunk_meta = manifest.chunks[0]
+                fragments_info = chunk_meta.fragments or []
+                target_frag = next((f for f in fragments_info if f.fragment_index == task.chunk_index), None)
+                if not target_frag:
+                    return False
 
-                get_url = f"{node.url}/v1/chunks/{task.bucket}/{task.version_id}/{task.chunk_index}"
-                try:
-                    resp = await self.http_client.get(get_url, headers={"X-Vault-Auth-Token": auth_token})
-                    if resp.status_code == 200:
-                        downloaded = resp.content
-                        downloaded_sha = hashlib.sha256(downloaded).hexdigest()
-                        # Strict source checksum validation
-                        if downloaded_sha == expected_sha:
-                            source_data = downloaded
-                            break
-                        else:
-                            logger.warning(f"Source node {node_id} returned corrupted chunk; trying another")
-                except Exception as exc:
-                    logger.debug(f"Failed to fetch source chunk from {node_id}: {exc}")
+                expected_sha = target_frag.sha256
+                target_node = self.cluster.get_storage_node(task.failed_node_id)
+                if not target_node or not target_node.active:
+                    target_node = self.cluster.get_storage_node(target_frag.node_id)
+                if not target_node:
+                    return False
 
-            if source_data is None:
-                logger.error(f"Repair impossible for {task.bucket}/{task.key} chunk {task.chunk_index}: no healthy source")
-                REPAIR_FAILURE_TOTAL.inc()
-                return False
+                # Gather surviving fragments (need at least K=4)
+                surviving_frags: Dict[int, bytes] = {}
+                for f_meta in fragments_info:
+                    if f_meta.fragment_index == task.chunk_index:
+                        continue
+                    src_node = self.cluster.get_storage_node(f_meta.node_id)
+                    if not src_node or not src_node.active:
+                        continue
+
+                    get_url = f"{src_node.url}/v1/chunks/{task.bucket}/{task.version_id}/{f_meta.fragment_index}"
+                    try:
+                        resp = await self.http_client.get(get_url, headers={"X-Vault-Auth-Token": auth_token})
+                        if resp.status_code == 200:
+                            f_data = resp.content
+                            if hashlib.sha256(f_data).hexdigest() == f_meta.sha256:
+                                surviving_frags[f_meta.fragment_index] = f_data
+                                if len(surviving_frags) >= 4:
+                                    break
+                    except Exception:
+                        pass
+
+                if len(surviving_frags) < 4:
+                    logger.error(f"Cannot repair EC fragment {task.chunk_index}: only {len(surviving_frags)} valid fragments")
+                    REPAIR_FAILURE_TOTAL.inc()
+                    return False
+
+                codec = ErasureCodec(4, 2)
+                orig_size = chunk_meta.original_chunk_size or chunk_meta.size_bytes
+                reconstructed_frag, frag_sha = codec.reconstruct_fragment(
+                    surviving_fragments=surviving_frags,
+                    original_size=orig_size,
+                    target_fragment_index=task.chunk_index,
+                )
+                if frag_sha != expected_sha:
+                    logger.error(f"Regenerated EC fragment hash mismatch: expected {expected_sha}, got {frag_sha}")
+                    REPAIR_FAILURE_TOTAL.inc()
+                    return False
+                source_data = reconstructed_frag
+
+            else:
+                # Handle Replicated Object Repair
+                if task.chunk_index >= len(manifest.chunks):
+                    return False
+                chunk_meta = manifest.chunks[task.chunk_index]
+                expected_sha = chunk_meta.sha256
+
+                target_node = self.cluster.get_storage_node(task.failed_node_id)
+                if not target_node or not target_node.active:
+                    active_nodes = self.cluster.get_active_storage_nodes()
+                    used_nodes = set(chunk_meta.placement_nodes)
+                    candidate_alts = [n for n in active_nodes if n.node_id not in used_nodes]
+                    if not candidate_alts:
+                        logger.error(f"Cannot repair {task.bucket}/{task.key}: no available alternative nodes")
+                        REPAIR_FAILURE_TOTAL.inc()
+                        return False
+                    target_node = candidate_alts[0]
+
+                for node_id in chunk_meta.placement_nodes:
+                    if node_id == task.failed_node_id:
+                        continue
+                    node = self.cluster.get_storage_node(node_id)
+                    if not node or not node.active:
+                        continue
+
+                    get_url = f"{node.url}/v1/chunks/{task.bucket}/{task.version_id}/{task.chunk_index}"
+                    try:
+                        resp = await self.http_client.get(get_url, headers={"X-Vault-Auth-Token": auth_token})
+                        if resp.status_code == 200:
+                            downloaded = resp.content
+                            if hashlib.sha256(downloaded).hexdigest() == expected_sha:
+                                source_data = downloaded
+                                break
+                    except Exception:
+                        pass
+
+                if source_data is None:
+                    logger.error(f"Repair impossible for {task.bucket}/{task.key} chunk {task.chunk_index}: no healthy source")
+                    REPAIR_FAILURE_TOTAL.inc()
+                    return False
 
             # 4. Upload verified chunk to target node
             put_url = f"{target_node.url}/v1/chunks/{task.bucket}/{task.version_id}/{task.chunk_index}"
@@ -244,6 +301,8 @@ class RepairWorker:
 
         return processed
 
+    repair_all = run_repair_cycle
+
     async def scan_and_enqueue_degraded_objects(self) -> int:
         """
         Audit all active objects in Raft metadata cluster against physical storage nodes.
@@ -273,45 +332,86 @@ class RepairWorker:
                 healthy_nodes = []
                 degraded_nodes = []
 
-                for node_id in chunk_meta.placement_nodes:
-                    node = self.cluster.get_storage_node(node_id)
-                    if not node or not node.active:
-                        degraded_nodes.append((node_id, "unreachable"))
-                        continue
+                if chunk_meta.is_erasure_coded:
+                    fragments_info = chunk_meta.fragments or []
+                    for f_info in fragments_info:
+                        node = self.cluster.get_storage_node(f_info.node_id)
+                        if not node or not node.active:
+                            degraded_nodes.append((f_info.fragment_index, f_info.node_id, f_info.sha256, "unreachable"))
+                            continue
 
-                    url = f"{node.url}/v1/chunks/{bucket}/{manifest.version_id}/{chunk_meta.chunk_index}"
-                    try:
-                        resp = await self.http_client.get(url, headers={"X-Vault-Auth-Token": auth_token})
-                        if resp.status_code == 200:
-                            actual_sha = hashlib.sha256(resp.content).hexdigest()
-                            if actual_sha == chunk_meta.sha256:
-                                healthy_nodes.append(node_id)
+                        url = f"{node.url}/v1/chunks/{bucket}/{manifest.version_id}/{f_info.fragment_index}"
+                        try:
+                            resp = await self.http_client.get(url, headers={"X-Vault-Auth-Token": auth_token})
+                            if resp.status_code == 200:
+                                actual_sha = hashlib.sha256(resp.content).hexdigest()
+                                if actual_sha == f_info.sha256:
+                                    healthy_nodes.append(f_info.node_id)
+                                else:
+                                    degraded_nodes.append((f_info.fragment_index, f_info.node_id, f_info.sha256, "corrupt"))
+                            elif resp.status_code == 404:
+                                degraded_nodes.append((f_info.fragment_index, f_info.node_id, f_info.sha256, "missing"))
+                            elif resp.status_code == 410:
+                                degraded_nodes.append((f_info.fragment_index, f_info.node_id, f_info.sha256, "corrupt"))
                             else:
-                                degraded_nodes.append((node_id, "corrupt"))
-                        elif resp.status_code == 404:
-                            degraded_nodes.append((node_id, "missing"))
-                        elif resp.status_code == 410:
-                            degraded_nodes.append((node_id, "corrupt"))
-                        else:
-                            degraded_nodes.append((node_id, "unreachable"))
-                    except Exception:
-                        degraded_nodes.append((node_id, "unreachable"))
+                                degraded_nodes.append((f_info.fragment_index, f_info.node_id, f_info.sha256, "unreachable"))
+                        except Exception:
+                            degraded_nodes.append((f_info.fragment_index, f_info.node_id, f_info.sha256, "unreachable"))
 
-                # Enqueue repair for each degraded replica
-                surviving_count = len(healthy_nodes)
-                for node_id, state in degraded_nodes:
-                    enqueued = self.enqueue_repair(
-                        bucket=bucket,
-                        key=key,
-                        version_id=manifest.version_id,
-                        chunk_index=chunk_meta.chunk_index,
-                        failed_node_id=node_id,
-                        expected_sha256=chunk_meta.sha256,
-                        surviving_healthy_replicas=surviving_count,
-                        state=state,
-                    )
-                    if enqueued:
-                        enqueued_count += 1
+                    surviving_count = len(healthy_nodes)
+                    for f_idx, node_id, f_sha, state in degraded_nodes:
+                        enqueued = self.enqueue_repair(
+                            bucket=bucket,
+                            key=key,
+                            version_id=manifest.version_id,
+                            chunk_index=f_idx,
+                            failed_node_id=node_id,
+                            expected_sha256=f_sha,
+                            surviving_healthy_replicas=surviving_count,
+                            state=state,
+                        )
+                        if enqueued:
+                            enqueued_count += 1
+
+                else:
+                    for node_id in chunk_meta.placement_nodes:
+                        node = self.cluster.get_storage_node(node_id)
+                        if not node or not node.active:
+                            degraded_nodes.append((chunk_meta.chunk_index, node_id, chunk_meta.sha256, "unreachable"))
+                            continue
+
+                        url = f"{node.url}/v1/chunks/{bucket}/{manifest.version_id}/{chunk_meta.chunk_index}"
+                        try:
+                            resp = await self.http_client.get(url, headers={"X-Vault-Auth-Token": auth_token})
+                            if resp.status_code == 200:
+                                actual_sha = hashlib.sha256(resp.content).hexdigest()
+                                if actual_sha == chunk_meta.sha256:
+                                    healthy_nodes.append(node_id)
+                                else:
+                                    degraded_nodes.append((chunk_meta.chunk_index, node_id, chunk_meta.sha256, "corrupt"))
+                            elif resp.status_code == 404:
+                                degraded_nodes.append((chunk_meta.chunk_index, node_id, chunk_meta.sha256, "missing"))
+                            elif resp.status_code == 410:
+                                degraded_nodes.append((chunk_meta.chunk_index, node_id, chunk_meta.sha256, "corrupt"))
+                            else:
+                                degraded_nodes.append((chunk_meta.chunk_index, node_id, chunk_meta.sha256, "unreachable"))
+                        except Exception:
+                            degraded_nodes.append((chunk_meta.chunk_index, node_id, chunk_meta.sha256, "unreachable"))
+
+                    surviving_count = len(healthy_nodes)
+                    for c_idx, node_id, c_sha, state in degraded_nodes:
+                        enqueued = self.enqueue_repair(
+                            bucket=bucket,
+                            key=key,
+                            version_id=manifest.version_id,
+                            chunk_index=c_idx,
+                            failed_node_id=node_id,
+                            expected_sha256=c_sha,
+                            surviving_healthy_replicas=surviving_count,
+                            state=state,
+                        )
+                        if enqueued:
+                            enqueued_count += 1
 
         return enqueued_count
 
