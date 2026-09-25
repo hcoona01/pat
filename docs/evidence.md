@@ -9,42 +9,39 @@
 
 | Test Suite | Run Timestamp | Environment | Total Tests | Passed | Failed | Status | Evidence File Reference |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Unit Tests (Smoke + Placement)** | 2026-09-26 02:55 UTC | Python 3.12.12 Local | 13 | 13 | 0 | ✅ PASSED | `tests/unit/test_smoke.py`, `tests/unit/test_placement.py` |
-| **Unit Tests (Erasure Coding 4+2)** | 2026-09-26 03:38 UTC | Python 3.12.12 Local (`zfec` RS Codec, K=4, M=2) | 32 | 32 | 0 | ✅ PASSED | `tests/unit/test_erasure_coding.py` |
-| **Single-Node Integration** | 2026-09-26 02:52 UTC | Python 3.12.12 Local (FastAPI + SQLite WAL) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_single_node.py` |
-| **Raft Consensus Integration** | 2026-09-26 03:00 UTC | 3-Node Raft Cluster (PySyncObj loopback) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_metadata_raft.py` |
-| **Multi-Node Cluster Replication** | 2026-09-26 03:04 UTC | 6 Storage Nodes + Raft (Hot & Durable Quorums) | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_cluster_replication.py` |
-| **Consistency & Versioning Integration** | 2026-09-26 03:11 UTC | 6 Storage Nodes + Raft (CAS, Stale 409, Tombstones, Audit) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_consistency_versioning.py` |
-| **Integrity & Repair Integration** | 2026-09-26 03:20 UTC | 6 Storage Nodes + Scanner + Repair Worker | 4 | 4 | 0 | ✅ PASSED | `tests/integration/test_integrity_repair.py` |
-| **Archive Erasure Coding Integration** | 2026-09-26 03:38 UTC | 6 Storage Nodes (RS 4+2, Multi-Zone, 1/2 Fault Tolerance, Repair) | 6 | 6 | 0 | ✅ PASSED | `tests/integration/test_archive_policy.py` |
-| **Membership & Rebalance Integration** | 2026-09-26 03:47 UTC | 7 Storage Nodes + Raft Membership + Rebalance Worker | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_membership_rebalance.py` |
-| **Total Test Suite** | 2026-09-26 03:49 UTC | Complete Repository Pytest Run (75.20s) | 86 | 86 | 0 | ✅ PASSED | `pytest tests -v` (86/86 passing) |
+| **Unit Tests (Smoke + Placement)** | 2026-09-26 04:27 UTC | Python 3.12.12 Local | 13 | 13 | 0 | ✅ PASSED | `tests/unit/test_smoke.py`, `tests/unit/test_placement.py` |
+| **Unit Tests (Erasure Coding 4+2)** | 2026-09-26 04:27 UTC | Python 3.12.12 Local (`zfec` RS Codec, K=4, M=2) | 32 | 32 | 0 | ✅ PASSED | `tests/unit/test_erasure_coding.py` |
+| **Single-Node Integration** | 2026-09-26 04:27 UTC | Python 3.12.12 Local (FastAPI + SQLite WAL) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_single_node.py` |
+| **Raft Consensus Integration** | 2026-09-26 04:27 UTC | 3-Node Raft Cluster (PySyncObj loopback) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_metadata_raft.py` |
+| **Multi-Node Cluster Replication** | 2026-09-26 04:27 UTC | 6 Storage Nodes + Raft (Hot & Durable Quorums) | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_cluster_replication.py` |
+| **Consistency & Versioning Integration** | 2026-09-26 04:27 UTC | 6 Storage Nodes + Raft (CAS, Stale 409, Tombstones, Audit) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_consistency_versioning.py` |
+| **Integrity & Repair Integration** | 2026-09-26 04:27 UTC | 6 Storage Nodes + Scanner + Repair Worker | 4 | 4 | 0 | ✅ PASSED | `tests/integration/test_integrity_repair.py` |
+| **Archive Erasure Coding Integration** | 2026-09-26 04:27 UTC | 6 Storage Nodes (RS 4+2, Multi-Zone, 1/2 Fault Tolerance, Repair) | 6 | 6 | 0 | ✅ PASSED | `tests/integration/test_archive_policy.py` |
+| **Membership & Rebalance Integration** | 2026-09-26 04:27 UTC | 7 Storage Nodes + Raft Membership + Rebalance Worker | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_membership_rebalance.py` |
+| **Chaos Fault-Injection Scenarios** | 2026-09-26 04:27 UTC | 6 Storage Nodes + Toxiproxy / Fault Injection Transport | 8 | 8 | 0 | ✅ PASSED | `tests/chaos/test_chaos_scenarios.py` |
+| **Workload & 1 GiB Benchmarks** | 2026-09-26 04:27 UTC | 1 GiB Streamed Object + Concurrent c=8 Load + SLO | 4 | 4 | 0 | ✅ PASSED | `tests/workload/test_workload_performance.py` |
+| **Total Test Suite** | 2026-09-26 04:27 UTC | Complete Repository Pytest Run (`latest_test_results.log`) | **98** | **98** | **0** | **✅ PASSED** | `docs/generated-evidence/latest_test_results.log` |
 
 ---
 
 ## 2. Cluster State Snapshots
 
-### 2.1 Storage Node Topology & Availability
-```text
-[Baseline: Cluster not yet started. Run ./scripts/start_cluster.sh to capture.]
-```
-
-### 2.2 Raft Metadata Consensus State
-```text
-[Baseline: Raft cluster not yet started. Run ./scripts/start_cluster.sh to capture.]
-```
+Captured automatically by `scripts/collect_evidence.sh` in [`docs/generated-evidence/`](file:///e:/vault/docs/generated-evidence/):
+- **Runtime Process Status**: [`docs/generated-evidence/docker_status.json`](file:///e:/vault/docs/generated-evidence/docker_status.json)
+- **Node & Raft Health**: [`docs/generated-evidence/cluster_health.json`](file:///e:/vault/docs/generated-evidence/cluster_health.json)
+- **Prometheus Metrics Snapshot**: [`docs/generated-evidence/metrics_snapshot.prom`](file:///e:/vault/docs/generated-evidence/metrics_snapshot.prom)
+- **Storage Overhead Breakdown**: [`docs/generated-evidence/storage_overhead.json`](file:///e:/vault/docs/generated-evidence/storage_overhead.json)
 
 ---
 
 ## 3. Durability & Fault-Recovery Validation Log
 
 ### 3.1 Object Checksum Invariance Across Injected Faults
-- **Target Object**: `bucket: test-bucket`, `key: large-file-128m.dat`
-- **Initial SHA-256**: `[Pending Execution]`
-- **Post-Node-Kill SHA-256**: `[Pending Execution]`
-- **Post-Corruption-Repair SHA-256**: `[Pending Execution]`
-- **Post-Rebalance SHA-256**: `[Pending Execution]`
-- **Checksum Invariance**: `PENDING VERIFICATION`
+- **Target Object**: `demo-bucket/demo/doc-hot.dat` (chunk index: 0)
+- **Initial SHA-256**: `e129bcf6d9ee3b1fa733de76b515d2eab946e867ee39d3959faa91f2facd8c97`
+- **Corrupted Disk SHA-256**: `af7ee66d876d7fc8d35bfec37476da45d7c340eadc542b4937af521c177f4c04` (detected & quarantined)
+- **Post-Repair SHA-256**: `e129bcf6d9ee3b1fa733de76b515d2eab946e867ee39d3959faa91f2facd8c97`
+- **Checksum Invariance**: **100% BIT-EXACT MATCH VALIDATED** (see [`docs/generated-evidence/fault_injection_hashes.json`](file:///e:/vault/docs/generated-evidence/fault_injection_hashes.json))
 
 ### 3.2 Injected Bit Rot & Quarantine Event
 Verified empirically via automated test `test_disk_corruption_scanner_detection_and_quarantine`:

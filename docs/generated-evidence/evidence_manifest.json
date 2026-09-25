@@ -1,0 +1,13 @@
+{
+  "timestamp": "20260925_225428Z",
+  "total_passed_tests": "98 passed",
+  "files": [
+    "docker_status.json",
+    "cluster_health.json",
+    "fault_injection_hashes.json",
+    "storage_overhead.json",
+    "metrics_snapshot.prom",
+    "demo_execution.log",
+    "latest_test_results.log"
+  ]
+}

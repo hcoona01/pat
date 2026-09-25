@@ -1,0 +1,28 @@
+{
+  "hot": {
+    "scheme": "replication",
+    "replication_factor": 3,
+    "write_quorum": 2,
+    "read_quorum": 1,
+    "raw_storage_amplification": 3.0,
+    "effective_storage_efficiency": "33.3%",
+    "data_loss_tolerance": "2 storage nodes"
+  },
+  "durable": {
+    "scheme": "replication",
+    "replication_factor": 4,
+    "write_quorum": 3,
+    "read_quorum": 1,
+    "raw_storage_amplification": 4.0,
+    "effective_storage_efficiency": "25.0%",
+    "data_loss_tolerance": "3 storage nodes"
+  },
+  "archive": {
+    "scheme": "erasure_coding",
+    "data_fragments": 4,
+    "parity_fragments": 2,
+    "raw_storage_amplification": 1.5,
+    "effective_storage_efficiency": "66.7%",
+    "data_loss_tolerance": "2 fragments/nodes"
+  }
+}

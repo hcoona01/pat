@@ -1,0 +1,6 @@
+{
+  "runtime": "local_process_mode",
+  "docker_available": false,
+  "cluster_pids_file": "none",
+  "timestamp": "20260925_225428Z"
+}

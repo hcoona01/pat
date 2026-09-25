@@ -1,0 +1,188 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 277.0
+python_gc_objects_collected_total{generation="1"} 60.0
+python_gc_objects_collected_total{generation="2"} 0.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 33.0
+python_gc_collections_total{generation="1"} 3.0
+python_gc_collections_total{generation="2"} 0.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="12",patchlevel="12",version="3.12.12"} 1.0
+# HELP vault_http_requests_total Total number of HTTP requests processed
+# TYPE vault_http_requests_total counter
+# HELP vault_http_request_duration_seconds HTTP request latency in seconds
+# TYPE vault_http_request_duration_seconds histogram
+# HELP vault_api_success_total Total successful high-level API operations
+# TYPE vault_api_success_total counter
+# HELP vault_api_failure_total Total failed high-level API operations
+# TYPE vault_api_failure_total counter
+# HELP vault_operation_latency_seconds Latency of core storage operations in seconds
+# TYPE vault_operation_latency_seconds histogram
+# HELP vault_read_latency_p50_seconds Rolling p50 read latency in seconds
+# TYPE vault_read_latency_p50_seconds gauge
+vault_read_latency_p50_seconds 0.0
+# HELP vault_read_latency_p95_seconds Rolling p95 read latency in seconds
+# TYPE vault_read_latency_p95_seconds gauge
+vault_read_latency_p95_seconds 0.0
+# HELP vault_read_latency_p99_seconds Rolling p99 read latency in seconds
+# TYPE vault_read_latency_p99_seconds gauge
+vault_read_latency_p99_seconds 0.0
+# HELP vault_write_latency_p50_seconds Rolling p50 write latency in seconds
+# TYPE vault_write_latency_p50_seconds gauge
+vault_write_latency_p50_seconds 0.0
+# HELP vault_write_latency_p95_seconds Rolling p95 write latency in seconds
+# TYPE vault_write_latency_p95_seconds gauge
+vault_write_latency_p95_seconds 0.0
+# HELP vault_write_latency_p99_seconds Rolling p99 write latency in seconds
+# TYPE vault_write_latency_p99_seconds gauge
+vault_write_latency_p99_seconds 0.0
+# HELP vault_storage_node_active Availability status of each storage node (1=active, 0=inactive)
+# TYPE vault_storage_node_active gauge
+# HELP vault_storage_nodes_active_total Total active storage nodes in the cluster topology
+# TYPE vault_storage_nodes_active_total gauge
+vault_storage_nodes_active_total 0.0
+# HELP vault_raft_is_leader Whether local metadata node is currently elected Raft leader (1=yes, 0=no)
+# TYPE vault_raft_is_leader gauge
+vault_raft_is_leader 0.0
+# HELP vault_raft_leader_elected Whether a cluster Raft leader is currently recognized (1=yes, 0=no)
+# TYPE vault_raft_leader_elected gauge
+vault_raft_leader_elected 0.0
+# HELP vault_raft_quorum_healthy Whether metadata consensus quorum is healthy (1=healthy, 0=unhealthy)
+# TYPE vault_raft_quorum_healthy gauge
+vault_raft_quorum_healthy 0.0
+# HELP vault_raft_peers_active Number of active connected peers in the Raft metadata cluster
+# TYPE vault_raft_peers_active gauge
+vault_raft_peers_active 0.0
+# HELP vault_under_replicated_objects Current count of objects with degraded, missing, or corrupt replicas
+# TYPE vault_under_replicated_objects gauge
+vault_under_replicated_objects 0.0
+# HELP vault_objects_total Current total number of active objects
+# TYPE vault_objects_total gauge
+vault_objects_total 0.0
+# HELP vault_chunks_total Current total number of stored chunks
+# TYPE vault_chunks_total gauge
+vault_chunks_total 0.0
+# HELP vault_bytes_stored_total Total raw bytes of chunk data stored on disk
+# TYPE vault_bytes_stored_total gauge
+vault_bytes_stored_total 0.0
+# HELP last_full_scan_at Timestamp of last completed full integrity scan
+# TYPE last_full_scan_at gauge
+last_full_scan_at 0.0
+# HELP chunks_verified_total Total chunks verified via cryptographic hash
+# TYPE chunks_verified_total counter
+chunks_verified_total 0.0
+# HELP chunks_verified_created Total chunks verified via cryptographic hash
+# TYPE chunks_verified_created gauge
+chunks_verified_created 1.790376877185754e+09
+# HELP corrupt_chunks_total Total corrupt chunks detected via checksum validation
+# TYPE corrupt_chunks_total counter
+corrupt_chunks_total 0.0
+# HELP corrupt_chunks_created Total corrupt chunks detected via checksum validation
+# TYPE corrupt_chunks_created gauge
+corrupt_chunks_created 1.790376877185754e+09
+# HELP quarantined_chunks_total Total number of chunks successfully moved to quarantine
+# TYPE quarantined_chunks_total counter
+quarantined_chunks_total 0.0
+# HELP quarantined_chunks_created Total number of chunks successfully moved to quarantine
+# TYPE quarantined_chunks_created gauge
+quarantined_chunks_created 1.790376877185754e+09
+# HELP vault_corrupt_chunks_detected_total Total corrupt chunks detected via checksum validation
+# TYPE vault_corrupt_chunks_detected_total counter
+vault_corrupt_chunks_detected_total 0.0
+# HELP vault_corrupt_chunks_detected_created Total corrupt chunks detected via checksum validation
+# TYPE vault_corrupt_chunks_detected_created gauge
+vault_corrupt_chunks_detected_created 1.790376877185754e+09
+# HELP repair_backlog Current number of chunk replicas pending background repair
+# TYPE repair_backlog gauge
+repair_backlog 0.0
+# HELP repair_success_total Total number of successfully repaired chunk replicas
+# TYPE repair_success_total counter
+repair_success_total 0.0
+# HELP repair_success_created Total number of successfully repaired chunk replicas
+# TYPE repair_success_created gauge
+repair_success_created 1.790376877185754e+09
+# HELP repair_failure_total Total number of failed replica repair attempts
+# TYPE repair_failure_total counter
+repair_failure_total 0.0
+# HELP repair_failure_created Total number of failed replica repair attempts
+# TYPE repair_failure_created gauge
+repair_failure_created 1.790376877185754e+09
+# HELP repair_duration_seconds Duration of replica repair operations in seconds
+# TYPE repair_duration_seconds histogram
+repair_duration_seconds_bucket{le="0.01"} 0.0
+repair_duration_seconds_bucket{le="0.05"} 0.0
+repair_duration_seconds_bucket{le="0.1"} 0.0
+repair_duration_seconds_bucket{le="0.25"} 0.0
+repair_duration_seconds_bucket{le="0.5"} 0.0
+repair_duration_seconds_bucket{le="1.0"} 0.0
+repair_duration_seconds_bucket{le="2.5"} 0.0
+repair_duration_seconds_bucket{le="5.0"} 0.0
+repair_duration_seconds_bucket{le="10.0"} 0.0
+repair_duration_seconds_bucket{le="+Inf"} 0.0
+repair_duration_seconds_count 0.0
+repair_duration_seconds_sum 0.0
+# HELP repair_duration_seconds_created Duration of replica repair operations in seconds
+# TYPE repair_duration_seconds_created gauge
+repair_duration_seconds_created 1.790376877185754e+09
+# HELP vault_rebalance_queued_tasks Current number of chunk migration tasks queued for rebalancing
+# TYPE vault_rebalance_queued_tasks gauge
+vault_rebalance_queued_tasks 0.0
+# HELP vault_rebalance_copied_total Total number of chunks copied during rebalance operations
+# TYPE vault_rebalance_copied_total counter
+vault_rebalance_copied_total 0.0
+# HELP vault_rebalance_copied_created Total number of chunks copied during rebalance operations
+# TYPE vault_rebalance_copied_created gauge
+vault_rebalance_copied_created 1.790376877185754e+09
+# HELP vault_rebalance_verified_total Total number of chunks destination-verified during rebalance operations
+# TYPE vault_rebalance_verified_total counter
+vault_rebalance_verified_total 0.0
+# HELP vault_rebalance_verified_created Total number of chunks destination-verified during rebalance operations
+# TYPE vault_rebalance_verified_created gauge
+vault_rebalance_verified_created 1.790376877185754e+09
+# HELP vault_rebalance_failed_total Total number of failed chunk rebalance attempts
+# TYPE vault_rebalance_failed_total counter
+vault_rebalance_failed_total 0.0
+# HELP vault_rebalance_failed_created Total number of failed chunk rebalance attempts
+# TYPE vault_rebalance_failed_created gauge
+vault_rebalance_failed_created 1.790376877185754e+09
+# HELP vault_rebalance_bytes_moved_total Total bytes of chunk data transferred during rebalancing
+# TYPE vault_rebalance_bytes_moved_total counter
+vault_rebalance_bytes_moved_total 0.0
+# HELP vault_rebalance_bytes_moved_created Total bytes of chunk data transferred during rebalancing
+# TYPE vault_rebalance_bytes_moved_created gauge
+vault_rebalance_bytes_moved_created 1.790376877185754e+09
+# HELP vault_rebalance_progress_ratio Rebalance completion percentage ratio from 0.0 to 1.0
+# TYPE vault_rebalance_progress_ratio gauge
+vault_rebalance_progress_ratio 0.0
+# HELP vault_rebalance_active Whether a rebalance operation is currently running (1 for active, 0 for idle)
+# TYPE vault_rebalance_active gauge
+vault_rebalance_active 0.0
+# HELP storage_amplification Measured storage amplification ratio by durability policy
+# TYPE storage_amplification gauge
+storage_amplification{policy="archive"} 1.5
+storage_amplification{policy="hot"} 3.0
+storage_amplification{policy="durable"} 4.0
+# HELP vault_data_quorum_failures_total Total write operations rejected due to data quorum failure
+# TYPE vault_data_quorum_failures_total counter
+# HELP vault_metadata_quorum_failures_total Total operations rejected due to Raft metadata quorum failure
+# TYPE vault_metadata_quorum_failures_total counter
+vault_metadata_quorum_failures_total 0.0
+# HELP vault_metadata_quorum_failures_created Total operations rejected due to Raft metadata quorum failure
+# TYPE vault_metadata_quorum_failures_created gauge
+vault_metadata_quorum_failures_created 1.790376877185754e+09
+# HELP vault_network_timeout_failures_total Total inter-node requests failing due to network timeout
+# TYPE vault_network_timeout_failures_total counter
+# HELP vault_idempotent_requests_total Total number of duplicate PUT requests served idempotently
+# TYPE vault_idempotent_requests_total counter
+vault_idempotent_requests_total 0.0
+# HELP vault_idempotent_requests_created Total number of duplicate PUT requests served idempotently
+# TYPE vault_idempotent_requests_created gauge
+vault_idempotent_requests_created 1.790376877185754e+09

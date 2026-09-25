@@ -1,0 +1,9 @@
+{
+  "target_object": "demo-bucket/demo/doc-hot.dat",
+  "chunk_index": 0,
+  "original_sha256": "e129bcf6d9ee3b1fa733de76b515d2eab946e867ee39d3959faa91f2facd8c97",
+  "corrupted_sha256": "af7ee66d876d7fc8d35bfec37476da45d7c340eadc542b4937af521c177f4c04",
+  "repaired_sha256": "e129bcf6d9ee3b1fa733de76b515d2eab946e867ee39d3959faa91f2facd8c97",
+  "bit_exact_match": true,
+  "timestamp": 1790376876.8524094
+}
