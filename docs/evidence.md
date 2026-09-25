@@ -9,9 +9,9 @@
 
 | Test Suite | Run Timestamp | Environment | Total Tests | Passed | Failed | Status | Evidence File Reference |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Unit Tests** | *Pending Run* | Python 3.12 Local | - | - | - | ⏳ Pending | `docs/generated-evidence/unit-test.log` |
-| **Integration Suite** | *Pending Run* | Docker Compose Cluster | - | - | - | ⏳ Pending | `docs/generated-evidence/integration-test.log` |
-| **Chaos Scenarios** | *Pending Run* | Docker Network + Faults| - | - | - | ⏳ Pending | `docs/generated-evidence/chaos-test.log` |
+| **Unit Smoke Suite** | 2026-09-26 02:50 UTC | Python 3.12.12 Local | 4 | 4 | 0 | ✅ PASSED | `tests/unit/test_smoke.py` |
+| **Single-Node Integration** | 2026-09-26 02:52 UTC | Python 3.12.12 Local (FastAPI + SQLite WAL) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_single_node.py` |
+| **Full Cluster Chaos** | *Pending Run* | Docker Network + Faults| - | - | - | ⏳ Pending Phase 9 | `docs/generated-evidence/chaos-test.log` |
 
 ---
 

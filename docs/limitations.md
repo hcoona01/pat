@@ -26,9 +26,9 @@
 - **Limitation**: Storage nodes use the local POSIX filesystem combined with SQLite (`aiosqlite` in WAL mode) for inventory indexing.
 - **Production Contrast**: Production object engines (such as Ceph BlueStore or MinIO) interact directly with block devices or bypass POSIX kernel caches using direct I/O (O_DIRECT) and asynchronous I/O (io_uring).
 
-### 1.6 Erasure Coding Performance
-- **Limitation**: Reed–Solomon matrix encoding/decoding is performed in Python via `zfec` / C-Python wrappers.
-- **Production Contrast**: Production systems utilize hardware-accelerated SIMD instructions (Intel ISA-L AVX-512 / ARM NEON) for multi-gigabyte-per-second throughput per core.
+### 1.7 Current Phase: Single-Node Baseline (No Fault Tolerance Yet)
+- **Status**: The storage service currently operates as a standalone single node utilizing local POSIX chunk storage and local SQLite metadata in WAL mode.
+- **Limitation**: **This phase is intentionally single-node and does NOT yet meet fault tolerance, high availability, or multi-node replication requirements.** If this single node crashes or its disk fails, all availability and unbacked data are lost. Multi-node placement, data quorums, background repair, and the 3-node Raft consensus cluster are scheduled for subsequent phases.
 
 ---
 
@@ -36,10 +36,12 @@
 
 | Requirement Category | Specified Capability | Implementation Status | Evidence / Notes |
 | :--- | :--- | :--- | :--- |
+| **Single-Node Core Engine** | Streaming PUT/GET/HEAD/DELETE, 8 MiB chunks, SHA-256, SQLite WAL, Idempotency | ✅ Complete | Verified in `tests/integration/test_single_node.py` (7/7 passed, including 128 MiB stream) |
 | **Metadata Consensus** | 3-Node Raft cluster, CAS logical versions | 🔄 In Progress (Design complete) | Raft state machine defined; tests in Phase 4 |
 | **Durability Policies** | `hot` (3x), `durable` (4x), `archive` (4+2 EC) | 🔄 In Progress (Config complete) | Policy spec defined in `config/policies.yaml` |
 | **Placement Engine** | Deterministic Rendezvous HRW across zones | 🔄 In Progress (Design complete) | Zone-first diversity logic planned |
-| **Storage Engine** | 6 nodes, independent SQLite + chunks | 🔄 In Progress (Design complete) | Docker compose topology defined |
-| **Integrity & Repair** | SHA-256 validation, quarantine, background repair | 🔄 In Progress (Design complete) | Repair flows and test plan defined |
+| **Storage Engine** | 6 nodes, independent SQLite + chunks | 🔄 In Progress (Topology defined) | Single-node baseline operational; cluster rollout next |
+| **Integrity & Repair** | SHA-256 validation, quarantine, background repair | 🔄 In Progress (Quarantine active) | Single-node on-read quarantine verified; background scrubber planned |
 | **Membership & Rebalance**| Admin node addition, HRW migration, verify-before-delete | 🔄 In Progress (Design complete) | Rebalance workflow planned |
-| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (Test plan complete) | Automated suite planned for Phase 9 |
+| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (11 unit/int tests pass) | Full chaos suite planned for cluster phases |
+
