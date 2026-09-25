@@ -217,6 +217,39 @@ services:
     networks:
       - vault-net
 
+  # ==========================================
+  # Toxiproxy Fault Injection Service
+  # ==========================================
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: vault-toxiproxy
+    command: -host=0.0.0.0 -config=/etc/toxiproxy/toxiproxy.json
+    ports:
+      - "8474:8474" # Toxiproxy Management API
+      - "8501:8501" # Toxiproxy route -> storage-1:8001
+      - "8502:8502" # Toxiproxy route -> storage-2:8001
+      - "8503:8503" # Toxiproxy route -> storage-3:8001
+      - "8504:8504" # Toxiproxy route -> storage-4:8001
+      - "8505:8505" # Toxiproxy route -> storage-5:8001
+      - "8506:8506" # Toxiproxy route -> storage-6:8001
+      - "9501:9501" # Toxiproxy route -> metadata-1:9001
+      - "9502:9502" # Toxiproxy route -> metadata-2:9001
+      - "9503:9503" # Toxiproxy route -> metadata-3:9001
+    volumes:
+      - ./config/toxiproxy.json:/etc/toxiproxy/toxiproxy.json:ro
+    networks:
+      - vault-net
+    depends_on:
+      - storage-1
+      - storage-2
+      - storage-3
+      - storage-4
+      - storage-5
+      - storage-6
+      - metadata-1
+      - metadata-2
+      - metadata-3
+
 volumes:
   meta-1-data:
   meta-2-data:

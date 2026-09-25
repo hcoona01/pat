@@ -1,0 +1,56 @@
+[
+  {
+    "name": "storage_1",
+    "listen": "0.0.0.0:8501",
+    "upstream": "storage-1:8001",
+    "enabled": true
+  },
+  {
+    "name": "storage_2",
+    "listen": "0.0.0.0:8502",
+    "upstream": "storage-2:8001",
+    "enabled": true
+  },
+  {
+    "name": "storage_3",
+    "listen": "0.0.0.0:8503",
+    "upstream": "storage-3:8001",
+    "enabled": true
+  },
+  {
+    "name": "storage_4",
+    "listen": "0.0.0.0:8504",
+    "upstream": "storage-4:8001",
+    "enabled": true
+  },
+  {
+    "name": "storage_5",
+    "listen": "0.0.0.0:8505",
+    "upstream": "storage-5:8001",
+    "enabled": true
+  },
+  {
+    "name": "storage_6",
+    "listen": "0.0.0.0:8506",
+    "upstream": "storage-6:8001",
+    "enabled": true
+  },
+  {
+    "name": "metadata_1",
+    "listen": "0.0.0.0:9501",
+    "upstream": "metadata-1:9001",
+    "enabled": true
+  },
+  {
+    "name": "metadata_2",
+    "listen": "0.0.0.0:9502",
+    "upstream": "metadata-2:9001",
+    "enabled": true
+  },
+  {
+    "name": "metadata_3",
+    "listen": "0.0.0.0:9503",
+    "upstream": "metadata-3:9001",
+    "enabled": true
+  }
+]

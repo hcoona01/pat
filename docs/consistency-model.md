@@ -94,3 +94,39 @@ The formal evaluation function `evaluate_gc_eligibility(manifest, current_manife
 3. **Superseded Historical Version**: If an older version was superseded by a newer committed version, it is eligible only after:
    $$\text{age} = t_{\text{now}} - \text{created\_at} \ge \text{retention\_period}$$
 4. **Uncommitted Orphan Chunks**: Chunks written to storage nodes where Raft commit failed or timed out are eligible after the orphan grace period (default 24 hours), preventing premature deletion during slow or concurrent uploads.
+
+---
+
+## 4. Formal CAP Trade-off Analysis
+
+### 4.1 Fundamental Trade-off: CP Architecture
+Under the Brewer CAP theorem, a distributed data store can guarantee at most two out of Consistency, Availability, and Partition Tolerance:
+
+$$\mathbf{C} \ (\text{Consistency}) + \mathbf{P} \ (\text{Partition Tolerance}) \implies \neg \mathbf{A} \ (\text{Availability under Partition})$$
+
+**Vault is explicitly and strictly designed as a CP system:**
+
+> **Vault prioritizes committed metadata consistency and configured write durability over accepting writes without required quorum.**
+
+In the presence of network partitions, isolated metadata followers, or storage node loss, Vault rejects writes with `HTTP 503 Service Unavailable` rather than accepting un-quorumed, stale, or potentially conflicting data.
+
+### 4.2 Architectural Guarantees & Invariants
+1. **Bounded Timeout Behavior**:
+   - All inter-node communications (gateway $\to$ storage nodes, metadata Raft RPCs) enforce deterministic, bounded timeouts ($\le 2.0-3.0\text{s}$).
+   - System never hangs or deadlocks under packet loss, connection drop, or network partition.
+2. **No False Successful Writes**:
+   - Vault **never** acknowledges a write (`HTTP 201 Created`) unless:
+     a. Configured data write quorum ($W$) has verified storage node receipts.
+     b. Object manifest has achieved strict majority consensus commit in Raft ($Q_{\text{meta}} = \lfloor N / 2 \rfloor + 1$).
+3. **No Uncommitted Manifest Visibility**:
+   - Uncommitted object manifests are **never visible** to clients. If data write quorum fails or Raft leader crashes prior to commit, the partial chunks are marked as orphan candidates for garbage collection, and subsequent reads return `HTTP 404 Not Found`.
+4. **Policy-Specific Availability Behavior**:
+   - **`hot` Policy** ($N=3, W=2, R=1$, $\ge 3$ zones): Continues serving reads if $\ge 1$ replica survives; accepts writes if $\ge 2$ replicas in $\ge 2$ distinct zones acknowledge.
+   - **`durable` Policy** ($N=4, W=3, R=1$, $\ge 3$ zones): Requires 3 of 4 replicas for write durability.
+   - **`archive` Policy** (Reed-Solomon $4+2$, $W=4, R=4$, $\ge 3$ zones): Tolerates arbitrary loss of any 2 storage nodes/fragments without data loss.
+5. **No Acknowledged Object Becomes Unreadable**:
+   - Any write acknowledged to a client withstands the failure or total isolation of an entire availability zone.
+   - Surviving zones retain sufficient replicas or erasure-coded fragments to satisfy read quorum ($R$).
+6. **Automatic Convergence & Self-Healing**:
+   - When partitioned or rebooted nodes recover connectivity, background repair workers (`RepairWorker`) detect degraded replica sets, audit physical inventories against committed Raft manifests, and converge replica health back to 100% without operator intervention.
+

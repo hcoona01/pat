@@ -573,6 +573,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
         policy_name: str = Header("hot", alias="X-Vault-Policy"),
         idempotency_key: Optional[str] = Header(None, alias="X-Idempotency-Key"),
         expected_version: Optional[int] = Header(None, alias="X-Expected-Version"),
+        version_id_header: Optional[str] = Header(None, alias="X-Version-ID"),
         content_type: str = Header("application/octet-stream", alias="Content-Type"),
     ) -> Response:
         """
@@ -601,7 +602,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
             )
 
         policy = gw.policies[policy_name]
-        version_id = str(uuid.uuid4())
+        version_id = version_id_header or str(uuid.uuid4())
         chunk_limit = gw.settings.chunk_size_bytes
 
         # Stream ingestion buffer
@@ -750,7 +751,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                 chunk_id=f"{version_id}_{idx}",
                 sha256=chunk_sha,
                 size_bytes=len(data_bytes),
-                placement_nodes=successful_nodes,
+                placement_nodes=[n.node_id for n in target_nodes],
             )
 
         # Stream request body

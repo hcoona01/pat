@@ -226,3 +226,28 @@ Vault is a hackathon prototype designed to demonstrate distributed systems princ
 - **Security**: Prototype shared-secret HMAC authentication; no AWS SigV4 or enterprise RBAC.
 - **Consensus Scope**: Single-region low-latency Raft consensus.
 - Detailed architectural trade-offs are documented in [docs/limitations.md](file:///e:/vault/docs/limitations.md).
+
+---
+
+## 8. Honest CAP Trade-Off Analysis
+
+Vault is explicitly architected as a **CP system** under the Brewer CAP theorem:
+
+$$\mathbf{C} \ (\text{Consistency}) + \mathbf{P} \ (\text{Partition Tolerance}) \implies \neg \mathbf{A} \ (\text{Availability under Partition})$$
+
+> **Vault prioritizes committed metadata consistency and configured write durability over accepting writes without required quorum.**
+
+### Resilience Invariants Verified Under Chaos Testing
+Using programmable network fault injection (`FaultInjectionTransport`) and containerized Toxiproxy (`ghcr.io/shopify/toxiproxy:2.9.0`), the automated chaos suite in `tests/chaos/test_chaos_scenarios.py` verifies:
+
+1. **Bounded Timeout Behavior**: All operations enforce strict timeouts ($\le 2-3\text{s}$) and fail fast with diagnostic HTTP status codes rather than hanging during network partitions.
+2. **No False Successful Writes**: Vault returns `HTTP 503 Service Unavailable` whenever physical data write quorum ($W$) or Raft metadata quorum ($Q_{\text{meta}} = \lfloor N/2 \rfloor + 1$) cannot be achieved.
+3. **No Uncommitted Manifest Visibility**: Writes that fail before consensus commit never record a manifest in Raft metadata (`HTTP 404 Not Found`). Uncommitted partial chunks are queued as orphan candidates for garbage collection.
+4. **Policy-Specific Availability**:
+   - `hot` ($N=3, W=2, R=1$): Survives arbitrary 1-node storage failure with zero impact to reads and writes.
+   - `durable` ($N=4, W=3, R=1$): Requires 3 of 4 replicas, providing enhanced durability across zones.
+   - `archive` (Reed-Solomon $4+2$): Survives the simultaneous loss of any 2 storage nodes/fragments with guaranteed SHA-256 data reconstruction.
+5. **Zone-Loss Tolerance**: Total outage or network isolation of an entire availability zone (e.g. `us-east-1a`) leaves acknowledged objects 100% readable from surviving zones.
+6. **Self-Healing Convergence**: Restoring network connectivity triggers automated background audit and repair (`RepairWorker`), restoring all degraded replicas back to `HEALTHY` state.
+7. **Safe Background Rebalancing**: Moving data to newly joined storage nodes executes concurrently with foreground reads/writes, maintaining 100% read success and guaranteeing that source replicas are never deleted prematurely before target verification.
+
