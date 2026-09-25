@@ -38,9 +38,46 @@ CORRUPT_CHUNKS_DETECTED_TOTAL = Counter(
     "Total number of corrupt chunks detected via checksum validation"
 )
 
+LAST_FULL_SCAN_AT = Gauge(
+    "last_full_scan_at",
+    "Timestamp of last completed full integrity scan"
+)
+
+CHUNKS_VERIFIED_TOTAL = Counter(
+    "chunks_verified_total",
+    "Total chunks verified via cryptographic hash"
+)
+
+CORRUPT_CHUNKS_TOTAL = Counter(
+    "corrupt_chunks_total",
+    "Total corrupt chunks detected via checksum validation"
+)
+
 QUARANTINED_CHUNKS_TOTAL = Counter(
-    "vault_quarantined_chunks_total",
+    "quarantined_chunks_total",
     "Total number of chunks successfully moved to quarantine"
+)
+
+# Active Repair Worker Metrics
+REPAIR_BACKLOG = Gauge(
+    "repair_backlog",
+    "Current number of chunk replicas pending background repair"
+)
+
+REPAIR_SUCCESS_TOTAL = Counter(
+    "repair_success_total",
+    "Total number of successfully repaired chunk replicas"
+)
+
+REPAIR_FAILURE_TOTAL = Counter(
+    "repair_failure_total",
+    "Total number of failed replica repair attempts"
+)
+
+REPAIR_DURATION_SECONDS = Histogram(
+    "repair_duration_seconds",
+    "Duration of replica repair operations in seconds",
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
 )
 
 # Idempotency hits

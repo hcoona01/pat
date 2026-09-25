@@ -12,6 +12,9 @@ from vault_core.metrics import (
     CHUNKS_TOTAL,
     BYTES_STORED_TOTAL,
     CORRUPT_CHUNKS_DETECTED_TOTAL,
+    CORRUPT_CHUNKS_TOTAL,
+    CHUNKS_VERIFIED_TOTAL,
+    LAST_FULL_SCAN_AT,
     QUARANTINED_CHUNKS_TOTAL,
 )
 
@@ -83,6 +86,10 @@ class LocalChunkStorage:
         # Atomic replacement
         shutil.move(str(temp_file), str(target_file))
 
+        # Write sidecar SHA-256 checksum for background integrity scanner
+        sha_sidecar = target_file.with_suffix(".sha256")
+        sha_sidecar.write_text(calculated_sha, encoding="utf-8")
+
         # Metrics
         CHUNKS_TOTAL.inc()
         BYTES_STORED_TOTAL.inc(len(data))
@@ -124,11 +131,13 @@ class LocalChunkStorage:
                 f"expected {expected_sha256}, read {actual_sha}. Quarantined."
             )
 
+        CHUNKS_VERIFIED_TOTAL.inc()
         return data
 
     def quarantine_chunk(self, file_path: Path, actual_sha: str, expected_sha256: str) -> Path:
         """Move a corrupted chunk into the quarantine area for administrative inspection."""
         CORRUPT_CHUNKS_DETECTED_TOTAL.inc()
+        CORRUPT_CHUNKS_TOTAL.inc()
         timestamp = int(time.time())
         dest_filename = f"{file_path.stem}_corrupt_{timestamp}_{actual_sha[:8]}.dat"
         dest_path = self.quarantine_dir / dest_filename
@@ -137,7 +146,61 @@ class LocalChunkStorage:
             shutil.move(str(file_path), str(dest_path))
             QUARANTINED_CHUNKS_TOTAL.inc()
             CHUNKS_TOTAL.dec()
+
+            # Remove or clean up sidecar checksum so it's not orphaned
+            sha_sidecar = file_path.with_suffix(".sha256")
+            if sha_sidecar.is_file():
+                sha_sidecar.unlink()
         except Exception:
             pass
 
         return dest_path
+
+    def scan_all_chunks(self) -> dict:
+        """
+        Execute a full synchronous integrity scan over all stored chunks on this node.
+        Recalculates SHA-256 for each chunk, compares against stored checksum,
+        and isolates corrupted files into quarantine.
+        """
+        start_time = time.time()
+        chunks_verified = 0
+        corrupt_detected = 0
+        quarantined = 0
+
+        # Scan all .dat files in chunks directory: /chunks/{bucket}/{version_id}/chunk_{index}.dat
+        for dat_file in list(self.chunks_dir.glob("*/*/*.dat")):
+            if not dat_file.is_file():
+                continue
+
+            sha_file = dat_file.with_suffix(".sha256")
+            if not sha_file.is_file():
+                # If sidecar missing, create it or skip
+                continue
+
+            expected_sha = sha_file.read_text(encoding="utf-8").strip()
+
+            try:
+                with open(dat_file, "rb") as f:
+                    data = f.read()
+
+                actual_sha = sha256_bytes(data)
+                if actual_sha == expected_sha:
+                    chunks_verified += 1
+                    CHUNKS_VERIFIED_TOTAL.inc()
+                else:
+                    corrupt_detected += 1
+                    self.quarantine_chunk(dat_file, actual_sha, expected_sha)
+                    quarantined += 1
+            except Exception:
+                pass
+
+        duration = time.time() - start_time
+        LAST_FULL_SCAN_AT.set(time.time())
+
+        return {
+            "chunks_verified": chunks_verified,
+            "corrupt_detected": corrupt_detected,
+            "quarantined": quarantined,
+            "duration_seconds": duration,
+            "scanned_at": time.time(),
+        }

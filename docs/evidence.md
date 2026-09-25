@@ -14,7 +14,8 @@
 | **Raft Consensus Integration** | 2026-09-26 03:00 UTC | 3-Node Raft Cluster (PySyncObj loopback) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_metadata_raft.py` |
 | **Multi-Node Cluster Replication** | 2026-09-26 03:04 UTC | 6 Storage Nodes + Raft (Hot & Durable Quorums) | 5 | 5 | 0 | ✅ PASSED | `tests/integration/test_cluster_replication.py` |
 | **Consistency & Versioning Integration** | 2026-09-26 03:11 UTC | 6 Storage Nodes + Raft (CAS, Stale 409, Tombstones, Audit) | 7 | 7 | 0 | ✅ PASSED | `tests/integration/test_consistency_versioning.py` |
-| **Total Test Suite** | 2026-09-26 03:11 UTC | Complete Repository Pytest Run (34.59s) | 39 | 39 | 0 | ✅ PASSED | `pytest tests -v` (39/39 passing) |
+| **Integrity & Repair Integration** | 2026-09-26 03:20 UTC | 6 Storage Nodes + Scanner + Repair Worker | 4 | 4 | 0 | ✅ PASSED | `tests/integration/test_integrity_repair.py` |
+| **Total Test Suite** | 2026-09-26 03:21 UTC | Complete Repository Pytest Run (40.68s) | 43 | 43 | 0 | ✅ PASSED | `pytest tests -v` (43/43 passing) |
 
 ---
 
@@ -43,9 +44,12 @@
 - **Checksum Invariance**: `PENDING VERIFICATION`
 
 ### 3.2 Injected Bit Rot & Quarantine Event
-```text
-[Awaiting execution of scripts/inject_corruption.py and background scrubber detection]
-```
+Verified empirically via automated test `test_disk_corruption_scanner_detection_and_quarantine`:
+- **Corruption Injection**: Modified byte content directly on disk for stored chunk `chunk_0.dat`.
+- **Detection**: `IntegrityScanner.scan_once()` recalculated SHA-256, detected checksum mismatch, and recorded alert.
+- **Quarantine Isolation**: Atomically moved corrupted chunk from `/chunks/{bucket}/{version_id}/chunk_0.dat` to `/quarantine/chunk_0_corrupt_{timestamp}_{hash}.dat`.
+- **Inaccessibility**: Subsequent read attempts returned `HTTP 404 Not Found`; corrupted chunk was never served to any client.
+- **Repair**: Read-repair and background repair worker retrieved verified chunk from surviving healthy replica and restored full replication factor (`healthy_count == 3`).
 
 ### 3.3 Dynamic Node Addition & HRW Rebalance
 - **Pre-Rebalance Placement**: `[Pending Execution]`

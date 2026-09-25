@@ -1,6 +1,5 @@
-"""API Gateway service orchestrating placement, storage replication quorums, and Raft metadata."""
-
 import asyncio
+from contextlib import asynccontextmanager
 import hashlib
 import time
 import uuid
@@ -9,6 +8,7 @@ from fastapi import FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse, Response as PlainResponse, StreamingResponse
 import httpx
 
+from apps.workers.repair_worker import RepairWorker
 from vault_core.auth import create_auth_token
 from vault_core.cluster import ClusterConfig, StorageNodeConfig
 from vault_core.logging_config import StructuredLoggingMiddleware, logger
@@ -59,6 +59,16 @@ class GatewayService:
         self._http_client = storage_http_client
         self.orphan_candidates: List[dict] = []
         self.repair_backlog: List[dict] = []
+
+        if self.metadata_raft:
+            self.repair_worker: Optional[RepairWorker] = RepairWorker(
+                cluster=self.cluster,
+                metadata_raft=self.metadata_raft,
+                http_client=self.get_http_client(),
+                secret_key=self.settings.secret_key,
+            )
+        else:
+            self.repair_worker = None
 
     def get_http_client(self) -> httpx.AsyncClient:
         if self._http_client is None:
@@ -139,10 +149,19 @@ class GatewayService:
 
 def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
     """Create FastAPI application for the distributed API Gateway."""
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        if gateway_service.repair_worker:
+            gateway_service.repair_worker.start()
+        yield
+        if gateway_service.repair_worker:
+            gateway_service.repair_worker.stop()
+
     app = FastAPI(
         title="Vault Object Storage Gateway",
         version="0.1.0",
         description="Distributed API Gateway with Raft metadata consensus and multi-node placement",
+        lifespan=lifespan,
     )
 
     app.add_middleware(StructuredLoggingMiddleware)
@@ -153,6 +172,34 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
         """Prometheus metrics endpoint."""
         body, content_type = get_latest_metrics()
         return Response(content=body, media_type=content_type)
+
+    @app.post("/v1/admin/repair/scan")
+    async def trigger_repair_scan() -> dict:
+        """Scan all active objects in Raft and enqueue any missing/corrupt/unreachable replicas."""
+        gw: GatewayService = app.state.gateway
+        if not gw.repair_worker:
+            raise HTTPException(status_code=503, detail="Repair worker uninitialized")
+        count = await gw.repair_worker.scan_and_enqueue_degraded_objects()
+        return {"enqueued_repairs": count, "backlog_size": gw.repair_worker._queue.qsize()}
+
+    @app.post("/v1/admin/repair/run")
+    async def run_repair_cycle(max_tasks: Optional[int] = None) -> dict:
+        """Execute pending repairs from the priority queue."""
+        gw: GatewayService = app.state.gateway
+        if not gw.repair_worker:
+            raise HTTPException(status_code=503, detail="Repair worker uninitialized")
+        processed = await gw.repair_worker.run_repair_cycle(max_tasks=max_tasks)
+        return {"processed_repairs": processed, "remaining_backlog": gw.repair_worker._queue.qsize()}
+
+    @app.get("/v1/admin/repair/status")
+    async def repair_status() -> dict:
+        """Inspect repair worker backlog and status."""
+        gw: GatewayService = app.state.gateway
+        backlog = gw.repair_worker._queue.qsize() if gw.repair_worker else 0
+        return {
+            "backlog_size": backlog,
+            "running": gw.repair_worker._running if gw.repair_worker else False,
+        }
 
     @app.get("/v1/cluster/health")
     async def cluster_health() -> dict:
@@ -605,23 +652,53 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                 verified_bytes: Optional[bytes] = None
 
                 # Query candidate replicas concurrently
-                read_tasks = [
-                    gw.fetch_chunk_from_node(
+                node_task_map = {
+                    node: asyncio.create_task(gw.fetch_chunk_from_node(
                         node=node,
                         bucket=bucket,
                         version_id=manifest.version_id,
                         chunk_index=chunk_meta.chunk_index,
                         expected_sha256=chunk_meta.sha256,
-                    )
+                    ))
                     for node in candidate_nodes
-                ]
+                }
 
                 # We iterate through completed reads or take the first valid replica
-                for coro in asyncio.as_completed(read_tasks):
-                    data = await coro
+                for fut in asyncio.as_completed(node_task_map.values()):
+                    data = await fut
                     if data is not None:
                         verified_bytes = data
                         break
+
+                # Enqueue any degraded/failed replica for read repair
+                if gw.repair_worker:
+                    async def evaluate_read_repairs():
+                        for n, t in node_task_map.items():
+                            try:
+                                res = await t
+                                if res is None:
+                                    gw.repair_worker.enqueue_repair(
+                                        bucket=bucket,
+                                        key=key,
+                                        version_id=manifest.version_id,
+                                        chunk_index=chunk_meta.chunk_index,
+                                        failed_node_id=n.node_id,
+                                        expected_sha256=chunk_meta.sha256,
+                                        surviving_healthy_replicas=1 if verified_bytes else 0,
+                                        state="corrupt_or_missing",
+                                    )
+                            except Exception:
+                                gw.repair_worker.enqueue_repair(
+                                    bucket=bucket,
+                                    key=key,
+                                    version_id=manifest.version_id,
+                                    chunk_index=chunk_meta.chunk_index,
+                                    failed_node_id=n.node_id,
+                                    expected_sha256=chunk_meta.sha256,
+                                    surviving_healthy_replicas=1 if verified_bytes else 0,
+                                    state="unreachable",
+                                )
+                    asyncio.create_task(evaluate_read_repairs())
 
                 if verified_bytes is None:
                     # Enqueue for repair

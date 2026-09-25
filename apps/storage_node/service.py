@@ -1,5 +1,4 @@
-"""One-node Vault storage service implementation."""
-
+import asyncio
 import hashlib
 import time
 import uuid
@@ -16,6 +15,7 @@ from vault_core.metrics import (
     IDEMPOTENT_HITS_TOTAL,
     get_latest_metrics,
 )
+from vault_core.scanner import IntegrityScanner
 from vault_core.settings import VaultSettings, settings
 from vault_core.storage import (
     ChecksumMismatchError,
@@ -32,15 +32,18 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
     # Initialize storage and metadata components
     storage = LocalChunkStorage(cfg.data_dir)
     metadata = MetadataRepository(cfg.data_dir / "vault_metadata.db")
+    scanner = IntegrityScanner(storage, scan_interval_seconds=60.0)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         await metadata.initialize()
+        scanner.start()
         logger.info(
-            f"Vault single-node service initialized with data_dir={cfg.data_dir}, "
+            f"Vault storage service initialized with data_dir={cfg.data_dir}, "
             f"chunk_size={cfg.chunk_size_bytes} bytes"
         )
         yield
+        scanner.stop()
 
     app = FastAPI(
         title="Vault Object Storage (Single Node Prototype)",
@@ -55,6 +58,7 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
     # Expose components on app.state for testing / direct inspection
     app.state.storage = storage
     app.state.metadata = metadata
+    app.state.scanner = scanner
     app.state.settings = cfg
 
     @app.get("/metrics")
@@ -62,6 +66,19 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
         """Prometheus metrics endpoint."""
         body, content_type = get_latest_metrics()
         return Response(content=body, media_type=content_type)
+
+    @app.post("/v1/admin/scan")
+    async def trigger_full_scan() -> dict:
+        """Trigger an immediate full integrity scan across all chunks on this storage node."""
+        return await asyncio.to_thread(scanner.scan_once)
+
+    @app.get("/v1/admin/scan/status")
+    async def scan_status() -> dict:
+        """Inspect last integrity scan outcome."""
+        return {
+            "running": scanner._running,
+            "last_scan": scanner.last_scan_result,
+        }
 
     @app.put("/v1/objects/{bucket}/{key:path}", status_code=status.HTTP_201_CREATED)
     async def put_object(
