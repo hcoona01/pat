@@ -1,0 +1,21 @@
+# Measurable Prototype Acceptance Targets and Service Level Objectives (SLOs)
+repair_slo_seconds: 15.0
+large_object_size_bytes: 1073741824 # 1 GiB
+large_object_count: 1000
+
+policy_targets:
+  hot:
+    policy_name: hot
+    data_loss_tolerance_nodes: 2
+    expected_storage_amplification: 3.0
+    description: "Replication Factor 3 across >=3 zones; tolerates 2 node failures"
+  durable:
+    policy_name: durable
+    data_loss_tolerance_nodes: 3
+    expected_storage_amplification: 4.0
+    description: "Replication Factor 4 across >=3 zones; tolerates 3 node failures"
+  archive:
+    policy_name: archive
+    data_loss_tolerance_nodes: 2
+    expected_storage_amplification: 1.5
+    description: "Reed-Solomon 4+2 across >=3 zones; tolerates 2 fragment/node failures"

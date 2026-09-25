@@ -31,10 +31,23 @@ from vault_core.metadata_raft import (
     RaftQuorumError,
 )
 from vault_core.metrics import (
+    DATA_QUORUM_FAILURES_TOTAL,
+    HTTP_REQUEST_DURATION_SECONDS,
     HTTP_REQUESTS_TOTAL,
     IDEMPOTENT_HITS_TOTAL,
+    METADATA_QUORUM_FAILURES_TOTAL,
+    NETWORK_TIMEOUT_FAILURES_TOTAL,
+    RAFT_IS_LEADER,
+    RAFT_LEADER_ELECTED,
+    RAFT_PEERS_ACTIVE,
+    RAFT_QUORUM_HEALTHY,
+    STORAGE_NODE_ACTIVE,
+    STORAGE_NODES_ACTIVE_TOTAL,
+    UNDER_REPLICATED_OBJECTS,
     get_latest_metrics,
+    record_operation_metrics,
 )
+from vault_core.targets import load_acceptance_targets
 from vault_core.placement import select_placement_nodes
 from vault_core.quorum import (
     DurabilityPolicy,
@@ -136,6 +149,8 @@ class GatewayService:
                     return {"node_id": node.node_id, "sha256": body.get("sha256")}
             logger.warning(f"Upload to node {node.node_id} returned status {resp.status_code}: {resp.text}")
         except Exception as exc:
+            if isinstance(exc, (httpx.TimeoutException, asyncio.TimeoutError)) or "timeout" in str(exc).lower():
+                NETWORK_TIMEOUT_FAILURES_TOTAL.labels(target_node=node.node_id).inc()
             logger.warning(f"Failed to upload chunk {chunk_index} to node {node.node_id} ({url}): {exc}")
 
         return None
@@ -170,6 +185,8 @@ class GatewayService:
             elif resp.status_code == 410:
                 logger.error(f"Node {node.node_id} reported chunk {chunk_index} quarantined/corrupt")
         except Exception as exc:
+            if isinstance(exc, (httpx.TimeoutException, asyncio.TimeoutError)) or "timeout" in str(exc).lower():
+                NETWORK_TIMEOUT_FAILURES_TOTAL.labels(target_node=node.node_id).inc()
             logger.warning(f"Error reading chunk {chunk_index} from node {node.node_id}: {exc}")
 
         return None
@@ -197,9 +214,37 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
 
     @app.get("/metrics")
     async def metrics_endpoint() -> Response:
-        """Prometheus metrics endpoint."""
+        """Prometheus metrics endpoint with live node availability and consensus gauges."""
+        gw: GatewayService = app.state.gateway
+
+        # Live storage node availability gauges
+        active_nodes = gw.cluster.get_active_storage_nodes()
+        STORAGE_NODES_ACTIVE_TOTAL.set(len(active_nodes))
+        for node in gw.cluster.storage_nodes:
+            STORAGE_NODE_ACTIVE.labels(node_id=node.node_id, zone=node.zone).set(1 if node.active else 0)
+
+        # Live Raft consensus health gauges
+        if gw.metadata_raft:
+            is_leader = gw.metadata_raft.is_leader()
+            leader_addr = gw.metadata_raft.get_leader_address()
+            RAFT_IS_LEADER.set(1 if is_leader else 0)
+            RAFT_LEADER_ELECTED.set(1 if leader_addr else 0)
+            status = gw.metadata_raft.getStatus() or {}
+            peers = status.get("partner_nodes_count", 0)
+            RAFT_PEERS_ACTIVE.set(peers)
+            RAFT_QUORUM_HEALTHY.set(1 if (is_leader or leader_addr) else 0)
+
+        # Under-replicated objects and repair backlog
+        if gw.repair_worker:
+            UNDER_REPLICATED_OBJECTS.set(gw.repair_worker.queue_size())
+
         body, content_type = get_latest_metrics()
         return Response(content=body, media_type=content_type)
+
+    @app.get("/v1/cluster/acceptance-targets")
+    async def get_acceptance_targets() -> dict:
+        """Retrieve configurable prototype acceptance targets and SLO specifications."""
+        return load_acceptance_targets().model_dump()
 
     @app.post("/v1/admin/repair/scan")
     async def trigger_repair_scan() -> dict:
@@ -587,6 +632,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
         7. If quorum or commit fails, record orphan candidates for garbage collection.
         """
         gw: GatewayService = app.state.gateway
+        write_start = time.time()
 
         idemp_key = idempotency_key or request.headers.get("Idempotency-Key")
         if not idemp_key:
@@ -664,6 +710,8 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
 
                 required_quorum = policy.write_quorum
                 if len(successful_nodes) < required_quorum:
+                    DATA_QUORUM_FAILURES_TOTAL.labels(policy=policy.name).inc()
+                    record_operation_metrics("write", time.time() - write_start, success=False, error_type="data_quorum_failure")
                     for n_id in successful_nodes:
                         gw.orphan_candidates.append({
                             "node_id": n_id,
@@ -719,6 +767,8 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
             # 3. Enforce data write quorum
             required_quorum = policy.write_quorum
             if len(successful_nodes) < required_quorum:
+                DATA_QUORUM_FAILURES_TOTAL.labels(policy=policy.name).inc()
+                record_operation_metrics("write", time.time() - write_start, success=False, error_type="data_quorum_failure")
                 # Mark successful writes as orphans for future GC sweep
                 for n_id in successful_nodes:
                     gw.orphan_candidates.append({
@@ -817,11 +867,14 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                 response_payload=response_payload,
             )
         except CASConflictError as exc:
+            record_operation_metrics("write", time.time() - write_start, success=False, error_type="cas_conflict")
             # Mark data as orphan since commit was rejected
             for item in all_written_chunks:
                 gw.orphan_candidates.append({**item, "created_at": time.time()})
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
         except (NotLeaderError, RaftQuorumError) as exc:
+            METADATA_QUORUM_FAILURES_TOTAL.inc()
+            record_operation_metrics("write", time.time() - write_start, success=False, error_type="metadata_quorum_failure")
             for item in all_written_chunks:
                 gw.orphan_candidates.append({**item, "created_at": time.time()})
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
@@ -846,6 +899,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                 }
             )
 
+        record_operation_metrics("write", time.time() - write_start, success=True)
         return JSONResponse(
             content=response_payload,
             status_code=status.HTTP_201_CREATED,
@@ -869,11 +923,14 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
         6. Record failed, missing, or corrupt replicas/fragments for repair.
         """
         gw: GatewayService = app.state.gateway
+        read_start = time.time()
         if not gw.metadata_raft:
+            record_operation_metrics("read", time.time() - read_start, success=False, error_type="metadata_unavailable")
             raise HTTPException(status_code=503, detail="Metadata consensus unavailable")
 
         manifest_dict = gw.metadata_raft.get_latest_manifest(bucket, key)
         if not manifest_dict or manifest_dict.get("is_tombstone"):
+            record_operation_metrics("read", time.time() - read_start, success=False, error_type="not_found")
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Object not found")
 
         manifest = ObjectManifest.model_validate(manifest_dict)
@@ -1003,6 +1060,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                 for c_bytes in reconstructed_chunks:
                     yield c_bytes
 
+            record_operation_metrics("read", time.time() - read_start, success=True)
             return StreamingResponse(ec_streamer(), media_type=manifest.content_type, headers=headers)
 
         # -------------------------------------------------------------
@@ -1089,6 +1147,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
                     )
 
                 yield verified_bytes
+            record_operation_metrics("read", time.time() - read_start, success=True)
 
         headers = {
             "Content-Length": str(manifest.size_bytes),
@@ -1099,6 +1158,7 @@ def create_gateway_app(gateway_service: GatewayService) -> FastAPI:
             "X-Vault-Policy": manifest.policy,
         }
 
+        record_operation_metrics("read", time.time() - read_start, success=True)
         return StreamingResponse(chunk_streamer(), media_type=manifest.content_type, headers=headers)
 
     @app.head("/v1/objects/{bucket}/{key:path}")

@@ -377,16 +377,6 @@ async def test_no_premature_deletion_of_source_replicas(rebalance_cluster_env):
     env = rebalance_cluster_env
     gw_client = httpx.AsyncClient(transport=env["gateway_transport"], base_url="http://gateway:8000")
 
-    # Add node-7 but DO NOT start its app in transport (target will fail to connect)
-    await gw_client.post("/v1/admin/nodes", json={
-        "node_id": "storage-7",
-        "url": "http://storage-7:8001",
-        "region": "us-east-1",
-        "zone": "us-east-1a",
-        "active": True,
-        "capacity_weight": 5.0,
-    })
-
     obj_key = "safety/no-delete-on-failure.dat"
     payload = b"Source replica must survive even when target destination fails!" * 80
     put_resp = await gw_client.put(
@@ -400,6 +390,16 @@ async def test_no_premature_deletion_of_source_replicas(rebalance_cluster_env):
     manifest_dict = env["raft_sm"].get_latest_manifest("test-bucket", obj_key)
     manifest = ObjectManifest.model_validate(manifest_dict)
     initial_sources = list(manifest.chunks[0].placement_nodes)
+
+    # Add node-7 but DO NOT start its app in transport (target will fail to connect)
+    await gw_client.post("/v1/admin/nodes", json={
+        "node_id": "storage-7",
+        "url": "http://storage-7:8001",
+        "region": "us-east-1",
+        "zone": "us-east-1a",
+        "active": True,
+        "capacity_weight": 5.0,
+    })
 
     # Trigger rebalance - storage-7 is offline so upload will fail
     await gw_client.post("/v1/admin/rebalance", params={"rate_limit": 50.0})
