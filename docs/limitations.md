@@ -27,8 +27,8 @@
 - **Production Contrast**: Production object engines (such as Ceph BlueStore or MinIO) interact directly with block devices or bypass POSIX kernel caches using direct I/O (O_DIRECT) and asynchronous I/O (io_uring).
 
 ### 1.7 Current Phase: Single-Node Baseline (No Fault Tolerance Yet)
-- **Status**: The storage service currently operates as a standalone single node utilizing local POSIX chunk storage and local SQLite metadata in WAL mode.
-- **Limitation**: **This phase is intentionally single-node and does NOT yet meet fault tolerance, high availability, or multi-node replication requirements.** If this single node crashes or its disk fails, all availability and unbacked data are lost. Multi-node placement, data quorums, background repair, and the 3-node Raft consensus cluster are scheduled for subsequent phases.
+- **Status**: The metadata consensus cluster is fully operational as a 3-node Raft cluster (`vault_core/metadata_raft.py`, `apps/metadata_node`), verified with leader election, follower partition recovery, leader loss re-election, CAS conflict rejection, and tombstone propagation.
+- **Limitation**: **Multi-node storage data replication has not yet been connected to the Raft metadata cluster.** Storage nodes currently operate independently. Coordinated distributed writes (Phase 5) will bind the gateway, storage nodes, and Raft consensus together.
 
 ---
 
@@ -36,12 +36,12 @@
 
 | Requirement Category | Specified Capability | Implementation Status | Evidence / Notes |
 | :--- | :--- | :--- | :--- |
+| **Metadata Consensus** | 3-Node Raft cluster, CAS logical versions, leader election, partitions | ✅ Complete | Verified in `tests/integration/test_metadata_raft.py` (7/7 passed: election, CAS 409, partition recovery, leader loss) |
 | **Single-Node Core Engine** | Streaming PUT/GET/HEAD/DELETE, 8 MiB chunks, SHA-256, SQLite WAL, Idempotency | ✅ Complete | Verified in `tests/integration/test_single_node.py` (7/7 passed, including 128 MiB stream) |
 | **Durability Policies** | `hot` (3x), `durable` (4x), `archive` (4+2 EC), quorum math | ✅ Complete | Verified in `tests/unit/test_placement.py` (policy validation, quorum bounds) |
 | **Placement Engine** | Deterministic Rendezvous HRW across regions & zones | ✅ Complete | Verified in `tests/unit/test_placement.py` (9/9 passed, 4-tier diversity, stability) |
-| **Metadata Consensus** | 3-Node Raft cluster, CAS logical versions | 🔄 In Progress (Design complete) | Raft state machine defined; tests in Phase 4 |
 | **Storage Engine** | 6 nodes, independent SQLite + chunks | 🔄 In Progress (Topology defined) | Single-node baseline operational; cluster rollout next |
 | **Integrity & Repair** | SHA-256 validation, quarantine, background repair | 🔄 In Progress (Quarantine active) | Single-node on-read quarantine verified; background scrubber planned |
 | **Membership & Rebalance**| Admin node addition, HRW migration, verify-before-delete | 🔄 In Progress (Design complete) | Rebalance workflow planned |
-| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (20 unit/int tests pass) | Full chaos suite planned for cluster phases |
+| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (27 unit/int tests pass) | Chaos test scenarios advancing with cluster components |
 
