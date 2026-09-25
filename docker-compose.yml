@@ -1,0 +1,233 @@
+services:
+  # ==========================================
+  # API Gateway
+  # ==========================================
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.gateway.main:app --host 0.0.0.0 --port 8000
+    container_name: vault-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - VAULT_ENV=development
+      - VAULT_ROLE=gateway
+      - VAULT_PORT=8000
+      - VAULT_CLUSTER_CONFIG_PATH=/app/config/cluster.yaml
+      - VAULT_POLICIES_CONFIG_PATH=/app/config/policies.yaml
+      - VAULT_SECRET_KEY=prototype-insecure-shared-secret-change-in-prod
+    networks:
+      - vault-net
+    depends_on:
+      - metadata-1
+      - metadata-2
+      - metadata-3
+
+  # ==========================================
+  # 3-Node Raft Metadata Cluster
+  # ==========================================
+  metadata-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.metadata_node.main:app --host 0.0.0.0 --port 9001
+    container_name: vault-metadata-1
+    ports:
+      - "9001:9001"
+      - "9002:9002"
+    environment:
+      - NODE_ID=meta-1
+      - BIND_ADDR=metadata-1:9002
+      - PARTNERS=metadata-2:9002,metadata-3:9002
+      - DATA_DIR=/data/meta-1
+      - API_PORT=9001
+    volumes:
+      - meta-1-data:/data/meta-1
+    networks:
+      - vault-net
+
+  metadata-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.metadata_node.main:app --host 0.0.0.0 --port 9001
+    container_name: vault-metadata-2
+    ports:
+      - "9011:9001"
+      - "9012:9002"
+    environment:
+      - NODE_ID=meta-2
+      - BIND_ADDR=metadata-2:9002
+      - PARTNERS=metadata-1:9002,metadata-3:9002
+      - DATA_DIR=/data/meta-2
+      - API_PORT=9001
+    volumes:
+      - meta-2-data:/data/meta-2
+    networks:
+      - vault-net
+
+  metadata-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.metadata_node.main:app --host 0.0.0.0 --port 9001
+    container_name: vault-metadata-3
+    ports:
+      - "9021:9001"
+      - "9022:9002"
+    environment:
+      - NODE_ID=meta-3
+      - BIND_ADDR=metadata-3:9002
+      - PARTNERS=metadata-1:9002,metadata-2:9002
+      - DATA_DIR=/data/meta-3
+      - API_PORT=9001
+    volumes:
+      - meta-3-data:/data/meta-3
+    networks:
+      - vault-net
+
+  # ==========================================
+  # 6 Storage Nodes (Across 3 Zones)
+  # ==========================================
+  storage-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.storage_node.main:app --host 0.0.0.0 --port 8001
+    container_name: vault-storage-1
+    ports:
+      - "8001:8001"
+    environment:
+      - NODE_ID=store-1
+      - REGION=us-east-1
+      - ZONE=us-east-1a
+      - DATA_DIR=/data/storage-1
+      - PORT=8001
+    volumes:
+      - storage-1-data:/data/storage-1
+    networks:
+      - vault-net
+
+  storage-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.storage_node.main:app --host 0.0.0.0 --port 8001
+    container_name: vault-storage-2
+    ports:
+      - "8002:8001"
+    environment:
+      - NODE_ID=store-2
+      - REGION=us-east-1
+      - ZONE=us-east-1a
+      - DATA_DIR=/data/storage-2
+      - PORT=8001
+    volumes:
+      - storage-2-data:/data/storage-2
+    networks:
+      - vault-net
+
+  storage-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.storage_node.main:app --host 0.0.0.0 --port 8001
+    container_name: vault-storage-3
+    ports:
+      - "8003:8001"
+    environment:
+      - NODE_ID=store-3
+      - REGION=us-east-1
+      - ZONE=us-east-1b
+      - DATA_DIR=/data/storage-3
+      - PORT=8001
+    volumes:
+      - storage-3-data:/data/storage-3
+    networks:
+      - vault-net
+
+  storage-4:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.storage_node.main:app --host 0.0.0.0 --port 8001
+    container_name: vault-storage-4
+    ports:
+      - "8004:8001"
+    environment:
+      - NODE_ID=store-4
+      - REGION=us-east-1
+      - ZONE=us-east-1b
+      - DATA_DIR=/data/storage-4
+      - PORT=8001
+    volumes:
+      - storage-4-data:/data/storage-4
+    networks:
+      - vault-net
+
+  storage-5:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.storage_node.main:app --host 0.0.0.0 --port 8001
+    container_name: vault-storage-5
+    ports:
+      - "8005:8001"
+    environment:
+      - NODE_ID=store-5
+      - REGION=us-east-1
+      - ZONE=us-east-1c
+      - DATA_DIR=/data/storage-5
+      - PORT=8001
+    volumes:
+      - storage-5-data:/data/storage-5
+    networks:
+      - vault-net
+
+  storage-6:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m uvicorn apps.storage_node.main:app --host 0.0.0.0 --port 8001
+    container_name: vault-storage-6
+    ports:
+      - "8006:8001"
+    environment:
+      - NODE_ID=store-6
+      - REGION=us-east-1
+      - ZONE=us-east-1c
+      - DATA_DIR=/data/storage-6
+      - PORT=8001
+    volumes:
+      - storage-6-data:/data/storage-6
+    networks:
+      - vault-net
+
+  # ==========================================
+  # Optional Prometheus Service
+  # ==========================================
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: vault-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - vault-net
+
+volumes:
+  meta-1-data:
+  meta-2-data:
+  meta-3-data:
+  storage-1-data:
+  storage-2-data:
+  storage-3-data:
+  storage-4-data:
+  storage-5-data:
+  storage-6-data:
+
+networks:
+  vault-net:
+    driver: bridge

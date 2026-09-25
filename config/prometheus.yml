@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "vault-gateway"
+    static_configs:
+      - targets: ["gateway:8000"]
+
+  - job_name: "vault-storage-nodes"
+    static_configs:
+      - targets:
+          - "storage-1:8001"
+          - "storage-2:8001"
+          - "storage-3:8001"
+          - "storage-4:8001"
+          - "storage-5:8001"
+          - "storage-6:8001"
+
+  - job_name: "vault-metadata-nodes"
+    static_configs:
+      - targets:
+          - "metadata-1:9001"
+          - "metadata-2:9001"
+          - "metadata-3:9001"
