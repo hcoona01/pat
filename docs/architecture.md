@@ -81,9 +81,23 @@ graph TD
 
 ---
 
-## 3. Durability Policies & Placement
+## 3. Durability Policies & Deterministic Placement Engine
 
-Placement is governed by Highest Random Weight (HRW) hashing evaluated over `(bucket, key, version, chunk_index, node_id)`. Placement strictly enforces **zone separation** before node separation: no two replicas or fragments of the same chunk may reside in the same failure domain if distinct domains are available.
+### 3.1 Failure-Domain Prioritized Placement Algorithm
+Placement is determined per chunk/fragment through a 4-tier deterministic ranking algorithm that enforces maximum fault tolerance before applying hash weights:
+1. **Tier 1 — Region Diversity**: Nodes in previously unrepresented geographic regions are preferred over nodes in already selected regions.
+2. **Tier 2 — Zone Diversity**: Nodes in previously unrepresented availability zones are preferred over nodes in already selected zones.
+3. **Tier 3 — Failure Domain Load Balancing**: Among nodes in represented zones, candidate nodes residing in zones with the fewest allocated replicas/fragments are prioritized to maintain an even balance across failure domains.
+4. **Tier 4 — Weighted Rendezvous (HRW) Hashing**: Ties are resolved using Highest Random Weight hashing incorporating each node's `capacity_weight`:
+   $$\text{score}(k, n) = \left( \frac{\text{int}_{64}(\text{SHA-256}(k \parallel n.\text{node\_id})) + 1}{2^{64} + 1} \right)^{1 / n.\text{capacity\_weight}}$$
+   where $k = \text{bucket}/\text{key}/\text{version\_id}/\text{chunk\_index}$.
+
+### 3.2 Impossibility & Anti-Degradation Guarantees
+- **No Duplicate Selection**: A single storage node can never hold more than one replica or fragment of any chunk.
+- **Strict Validation**: If a cluster lacks sufficient active nodes ($|\mathcal{A}| < N$) or distinct zones ($|\mathcal{Z}| < Z_{\min}$), the write is rejected immediately (`InsufficientNodesError` or `InsufficientZonesError`).
+- **Zero Silent Degradation**: Vault never silently reduces replication factor or collapses multi-zone placement to mask an infrastructure shortfall.
+
+### 3.3 Durability Policies
 
 | Policy | Scheme | Placement Formula | Quorum (Write/Read) | Min Distinct Zones | Storage Amplification | Trade-off |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |

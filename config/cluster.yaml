@@ -3,51 +3,54 @@ cluster_id: "vault-dev-cluster"
 metadata_nodes:
   - id: "meta-1"
     host: "metadata-1"
+    url: "http://metadata-1:9001"
     api_port: 9001
     raft_port: 9002
   - id: "meta-2"
     host: "metadata-2"
+    url: "http://metadata-2:9001"
     api_port: 9001
     raft_port: 9002
   - id: "meta-3"
     host: "metadata-3"
+    url: "http://metadata-3:9001"
     api_port: 9001
     raft_port: 9002
 
 storage_nodes:
-  - id: "store-1"
-    host: "storage-1"
-    port: 8001
+  - node_id: "store-1"
+    url: "http://storage-1:8001"
     region: "us-east-1"
     zone: "us-east-1a"
-    status: "active"
-  - id: "store-2"
-    host: "storage-2"
-    port: 8001
+    active: true
+    capacity_weight: 1.0
+  - node_id: "store-2"
+    url: "http://storage-2:8001"
     region: "us-east-1"
     zone: "us-east-1a"
-    status: "active"
-  - id: "store-3"
-    host: "storage-3"
-    port: 8001
+    active: true
+    capacity_weight: 1.0
+  - node_id: "store-3"
+    url: "http://storage-3:8001"
     region: "us-east-1"
     zone: "us-east-1b"
-    status: "active"
-  - id: "store-4"
-    host: "storage-4"
-    port: 8001
+    active: true
+    capacity_weight: 1.0
+  - node_id: "store-4"
+    url: "http://storage-4:8001"
     region: "us-east-1"
     zone: "us-east-1b"
-    status: "active"
-  - id: "store-5"
-    host: "storage-5"
-    port: 8001
+    active: true
+    capacity_weight: 1.0
+  - node_id: "store-5"
+    url: "http://storage-5:8001"
     region: "us-east-1"
     zone: "us-east-1c"
-    status: "active"
-  - id: "store-6"
-    host: "storage-6"
-    port: 8001
+    active: true
+    capacity_weight: 1.0
+  - node_id: "store-6"
+    url: "http://storage-6:8001"
     region: "us-east-1"
     zone: "us-east-1c"
-    status: "active"
+    active: true
+    capacity_weight: 1.0

@@ -37,11 +37,11 @@
 | Requirement Category | Specified Capability | Implementation Status | Evidence / Notes |
 | :--- | :--- | :--- | :--- |
 | **Single-Node Core Engine** | Streaming PUT/GET/HEAD/DELETE, 8 MiB chunks, SHA-256, SQLite WAL, Idempotency | ✅ Complete | Verified in `tests/integration/test_single_node.py` (7/7 passed, including 128 MiB stream) |
+| **Durability Policies** | `hot` (3x), `durable` (4x), `archive` (4+2 EC), quorum math | ✅ Complete | Verified in `tests/unit/test_placement.py` (policy validation, quorum bounds) |
+| **Placement Engine** | Deterministic Rendezvous HRW across regions & zones | ✅ Complete | Verified in `tests/unit/test_placement.py` (9/9 passed, 4-tier diversity, stability) |
 | **Metadata Consensus** | 3-Node Raft cluster, CAS logical versions | 🔄 In Progress (Design complete) | Raft state machine defined; tests in Phase 4 |
-| **Durability Policies** | `hot` (3x), `durable` (4x), `archive` (4+2 EC) | 🔄 In Progress (Config complete) | Policy spec defined in `config/policies.yaml` |
-| **Placement Engine** | Deterministic Rendezvous HRW across zones | 🔄 In Progress (Design complete) | Zone-first diversity logic planned |
 | **Storage Engine** | 6 nodes, independent SQLite + chunks | 🔄 In Progress (Topology defined) | Single-node baseline operational; cluster rollout next |
 | **Integrity & Repair** | SHA-256 validation, quarantine, background repair | 🔄 In Progress (Quarantine active) | Single-node on-read quarantine verified; background scrubber planned |
 | **Membership & Rebalance**| Admin node addition, HRW migration, verify-before-delete | 🔄 In Progress (Design complete) | Rebalance workflow planned |
-| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (11 unit/int tests pass) | Full chaos suite planned for cluster phases |
+| **Testing & Chaos** | 17 comprehensive integration & fault scenarios | 🔄 In Progress (20 unit/int tests pass) | Full chaos suite planned for cluster phases |
 
