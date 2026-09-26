@@ -1,30 +1,40 @@
-"""Public Cloud Run demo; deliberately not a distributed storage data plane."""
+"""Public, truthful Vault project dashboard.
+
+This service deliberately visualises the project and its verification surface; it
+does not impersonate the multi-node storage cluster.
+"""
 import os
+
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
 app = FastAPI(title="Vault Demo", version=os.getenv("VAULT_VERSION", "0.1.0"))
 
 NOTICE = (
-    "This Cloud Run service is a public Vault demo and documentation endpoint. "
-    "The verified multi-node fault-tolerance demonstration runs through Docker Compose "
-    "E2E tests; this Cloud Run instance is not a six-node storage cluster."
+    "This hosted service is a public Vault dashboard and documentation endpoint. "
+    "The verified multi-node fault-tolerance demonstration runs through Docker "
+    "Compose E2E tests; this service is not a six-node storage cluster."
 )
+
 
 @app.get("/", response_class=HTMLResponse)
 async def landing() -> str:
-    return f"""<!doctype html><html><head><title>Vault Demo</title></head><body>
-    <h1>Vault</h1><p>{NOTICE}</p>
-    <ul><li><a href='/healthz'>Health</a></li><li><a href='/architecture'>Architecture</a></li>
-    <li><a href='/limitations'>Limitations</a></li><li><a href='/docs'>API docs</a></li></ul></body></html>"""
+    return """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vault | Distributed Storage</title>
+<style>
+:root{--ink:#eaf1ff;--muted:#9caac8;--line:rgba(164,181,220,.16);--card:rgba(14,24,48,.76);--blue:#63a7ff;--cyan:#3be4d2;--green:#48dd9b;--amber:#ffca69}*{box-sizing:border-box}body{margin:0;color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,sans-serif;background:#070d1d}body:before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 8% 0%,#172f62 0,transparent 29rem),radial-gradient(circle at 91% 11%,#0b514e 0,transparent 24rem),#070d1d}body:after{content:"";position:fixed;inset:0;z-index:-1;opacity:.25;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,black,transparent 72%)}.shell{max-width:1180px;margin:auto;padding:24px 24px 62px}nav{display:flex;align-items:center;justify-content:space-between;padding:8px 0 54px}.brand{display:flex;gap:11px;align-items:center;font-weight:750;letter-spacing:.3px;font-size:19px}.mark{display:grid;place-items:center;width:31px;height:31px;border:1px solid var(--cyan);border-radius:9px;color:var(--cyan);box-shadow:0 0 24px rgba(59,228,210,.2)}nav a{color:var(--muted);text-decoration:none;font-size:13px}nav a:hover{color:var(--ink)}.eyebrow{color:var(--cyan);letter-spacing:.16em;text-transform:uppercase;font-size:11px;font-weight:750}h1{max-width:820px;margin:12px 0 16px;font-size:clamp(42px,7vw,78px);line-height:1;letter-spacing:-.06em}.lead{max-width:665px;color:#c0cce5;font-size:18px}.actions{display:flex;flex-wrap:wrap;gap:11px;margin:27px 0 64px}.button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:11px 15px;background:rgba(10,18,38,.55);color:var(--ink);text-decoration:none;font-weight:650;font-size:14px}.button.primary{color:#031210;background:var(--cyan);border-color:var(--cyan)}.button:hover{transform:translateY(-1px)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.card{border:1px solid var(--line);background:var(--card);border-radius:13px;padding:19px;box-shadow:0 14px 45px rgba(0,0,0,.15)}.label{color:var(--muted);text-transform:uppercase;letter-spacing:.11em;font-size:10px;font-weight:700}.value{font-size:25px;font-weight:730;letter-spacing:-.04em;margin-top:5px}.ok{color:var(--green)}.cards{display:grid;grid-template-columns:1.2fr .8fr;gap:13px;margin-top:13px}h2{margin:0 0 14px;font-size:19px;letter-spacing:-.025em}.sub{color:var(--muted);margin:-7px 0 18px}.topology{display:grid;gap:12px;padding:7px 0 2px}.lane{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.node{border:1px solid rgba(99,167,255,.35);background:rgba(56,101,176,.11);border-radius:8px;padding:8px 10px;font-size:12px;color:#cfddff}.node.green{border-color:rgba(72,221,155,.36);background:rgba(72,221,155,.08)}.arrow{color:var(--cyan);opacity:.75}.check{display:grid;grid-template-columns:20px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.check:last-child{border:0}.check b{display:block;font-size:14px}.check p{color:var(--muted);margin:2px 0 0;font-size:13px}.dot{width:9px;height:9px;margin-top:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}.notice{display:flex;gap:11px;margin-top:13px;padding:15px 17px;border-left:3px solid var(--amber);background:rgba(255,202,105,.08);border-radius:0 10px 10px 0;color:#e7d6b0;font-size:13px}footer{color:#71809f;margin-top:40px;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}@media(max-width:760px){nav{padding-bottom:35px}.grid{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}.shell{padding:20px 16px 44px}.lead{font-size:16px}}
+</style></head><body><main class="shell"><nav><div class="brand"><span class="mark">V</span> Vault</div><a href="/docs">API documentation ↗</a></nav><section><div class="eyebrow">Fault-tolerant object storage</div><h1>Data stays available when nodes don’t.</h1><p class="lead">Vault is a Python distributed-object-storage project designed around replication, integrity checks, metadata consensus, and automated recovery.</p><div class="actions"><a class="button primary" href="/healthz">● Live service health</a><a class="button" href="/architecture">View architecture JSON</a><a class="button" href="/limitations">Deployment scope</a></div></section><section class="grid"><div class="card"><div class="label">Public dashboard</div><div class="value ok" id="status">Checking…</div></div><div class="card"><div class="label">Metadata quorum</div><div class="value">3 nodes</div></div><div class="card"><div class="label">Storage fleet</div><div class="value">6 nodes</div></div><div class="card"><div class="label">Data protection</div><div class="value">SHA-256</div></div></section><section class="cards"><article class="card"><h2>Reference topology</h2><p class="sub">The reproducible Docker Compose environment models independent failure domains.</p><div class="topology"><div class="lane"><span class="node">Client</span><span class="arrow">→</span><span class="node green">API gateway</span></div><div class="lane"><span class="arrow">↙</span><span class="node">Raft meta-1</span><span class="node">Raft meta-2</span><span class="node">Raft meta-3</span><span class="arrow">↘</span></div><div class="lane"><span class="node green">store-1</span><span class="node green">store-2</span><span class="node green">store-3</span><span class="node green">store-4</span><span class="node green">store-5</span><span class="node green">store-6</span></div></div></article><article class="card"><h2>Resilience surface</h2><div class="check"><i class="dot"></i><div><b>Integrity verification</b><p>Chunk digests expose corruption before data is returned.</p></div></div><div class="check"><i class="dot"></i><div><b>Repair and rebalancing</b><p>Background workers restore replicas after node loss.</p></div></div><div class="check"><i class="dot"></i><div><b>Configurable durability</b><p>Replication policy is selected per storage workflow.</p></div></div></article></section><aside class="notice"><span>⚠</span><span><b>Honest deployment note.</b> This free public instance serves the project dashboard only. It does not claim to be the multi-node durability cluster; that topology is exercised through the repository’s Docker E2E workflow.</span></aside><footer><span>Vault · Python 3.12 · distributed storage research build</span><span id="version">Loading service metadata…</span></footer></main><script>fetch('/healthz').then(r=>r.json()).then(d=>{document.querySelector('#status').textContent=d.status==='ok'?'Operational':'Degraded';document.querySelector('#version').textContent='version '+d.version+' · '+(d.git_sha||'deployment build')}).catch(()=>{document.querySelector('#status').textContent='Unavailable'})</script></body></html>"""
+
 
 @app.get("/healthz")
 async def healthz() -> dict:
     return {"status": "ok", "mode": "cloud_demo", "version": app.version, "git_sha": os.getenv("GIT_SHA", "unknown")}
 
+
 @app.get("/architecture")
 async def architecture() -> dict:
     return {"components": ["API gateway", "three-node Raft metadata cluster", "six storage nodes", "repair and rebalance workers"], "local_verification": "Docker Compose E2E"}
+
 
 @app.get("/limitations")
 async def limitations() -> dict:
