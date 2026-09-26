@@ -100,12 +100,17 @@ archive:
   minimum_distinct_zones: 3
 ```
 
-archive:
-  scheme: erasure_coding
-  data_fragments: 4
-  parity_fragments: 2
-  minimum_distinct_zones: 3
-```
+### Security and accessibility checklist
+
+- Internal storage-node control and chunk endpoints require a signed
+  `X-Vault-Auth-Token`; no storage-node ports are published by Compose.
+- Secrets are supplied through `VAULT_SECRET_KEY` and are never committed as a
+  production credential. Use a long random value in a local `.env` file.
+- Object integrity is verified with SHA-256 before a chunk is returned; bad
+  chunks are quarantined and scheduled for repair.
+- The public dashboard is responsive, uses semantic headings and links, offers
+  keyboard-accessible endpoint navigation, and exposes a plain JSON health API
+  at `/healthz`.
 
 ### Comprehensive Durability Policy Trade-Off Matrix
 
@@ -327,5 +332,4 @@ Using programmable network fault injection (`FaultInjectionTransport`) and conta
 5. **Zone-Loss Tolerance**: Total outage or network isolation of an entire availability zone (e.g. `us-east-1a`) leaves acknowledged objects 100% readable from surviving zones.
 6. **Self-Healing Convergence**: Restoring network connectivity triggers automated background audit and repair (`RepairWorker`), restoring all degraded replicas back to `HEALTHY` state.
 7. **Safe Background Rebalancing**: Moving data to newly joined storage nodes executes concurrently with foreground reads/writes, maintaining 100% read success and guaranteeing that source replicas are never deleted prematurely before target verification.
-
 
