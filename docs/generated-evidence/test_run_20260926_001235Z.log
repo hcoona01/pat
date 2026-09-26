@@ -1,0 +1,892 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.12, pytest-8.4.2, pluggy-1.6.0 -- C:\msys64\ucrt64\bin\python.exe
+cachedir: .pytest_cache
+rootdir: E:\vault
+configfile: pyproject.toml
+plugins: anyio-4.11.0, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 121 items
+
+tests/e2e_docker/test_e2e_compose.py::TestCleanStartup::test_gateway_healthy SKIPPED [  0%]
+tests/e2e_docker/test_e2e_compose.py::TestCleanStartup::test_all_storage_nodes_healthy SKIPPED [  1%]
+tests/e2e_docker/test_e2e_compose.py::TestCleanStartup::test_metadata_quorum_healthy SKIPPED [  2%]
+tests/e2e_docker/test_e2e_compose.py::TestCleanStartup::test_three_distinct_zones SKIPPED [  3%]
+tests/e2e_docker/test_e2e_compose.py::TestPersistence::test_put_restart_get_object SKIPPED [  4%]
+tests/e2e_docker/test_e2e_compose.py::TestReplicationFaultTolerance::test_hot_policy_survives_one_node_down SKIPPED [  4%]
+tests/e2e_docker/test_e2e_compose.py::TestMetadataQuorum::test_operations_after_one_metadata_node_down SKIPPED [  5%]
+tests/integration/test_archive_policy.py::test_archive_policy_upload_placement_across_zones_and_storage_amplification PASSED [  6%]
+tests/integration/test_archive_policy.py::test_archive_read_with_one_missing_fragment PASSED [  7%]
+tests/integration/test_archive_policy.py::test_archive_read_with_two_missing_fragments PASSED [  8%]
+tests/integration/test_archive_policy.py::test_archive_failed_read_with_fewer_than_four_fragments PASSED [  9%]
+tests/integration/test_archive_policy.py::test_archive_automatic_background_fragment_repair FAILED [  9%]
+tests/integration/test_archive_policy.py::test_archive_final_object_hash_validation_guards_against_serving_corrupted_data PASSED [ 10%]
+tests/integration/test_cluster_replication.py::test_hot_and_durable_policies_upload_and_retrieve PASSED [ 11%]
+tests/integration/test_cluster_replication.py::test_concurrent_uploads_and_reads PASSED [ 12%]
+tests/integration/test_cluster_replication.py::test_one_storage_node_failure_during_write PASSED [ 13%]
+tests/integration/test_cluster_replication.py::test_write_failure_when_quorum_unavailable_and_no_manifest_visible PASSED [ 14%]
+tests/integration/test_cluster_replication.py::test_reads_from_surviving_replicas_after_node_fails PASSED [ 14%]
+tests/integration/test_consistency_versioning.py::test_concurrent_writers_cas_exactly_one_succeeds PASSED [ 15%]
+tests/integration/test_consistency_versioning.py::test_stale_writer_receiving_http_409 PASSED [ 16%]
+tests/integration/test_consistency_versioning.py::test_versioned_tombstone_behavior PASSED [ 17%]
+tests/integration/test_consistency_versioning.py::test_old_replica_not_visible_after_newer_committed_version PASSED [ 18%]
+tests/integration/test_consistency_versioning.py::test_failed_raft_commit_leaves_no_visible_object_version PASSED [ 19%]
+tests/integration/test_consistency_versioning.py::test_replica_inventory_audit_convergence_states FAILED [ 19%]
+tests/integration/test_consistency_versioning.py::test_gc_eligibility_rules PASSED [ 20%]
+tests/integration/test_integrity_repair.py::test_disk_corruption_scanner_detection_and_quarantine PASSED [ 21%]
+tests/integration/test_integrity_repair.py::test_read_repair_enqueues_and_restores_replica FAILED [ 22%]
+tests/integration/test_integrity_repair.py::test_cluster_audit_and_prioritized_repair_workflow FAILED [ 23%]
+tests/integration/test_integrity_repair.py::test_metrics_exposition_integrity_and_repair PASSED [ 23%]
+tests/integration/test_membership_rebalance.py::test_admin_node_membership_lifecycle PASSED [ 24%]
+tests/integration/test_membership_rebalance.py::test_rebalance_trigger_and_rendezvous_placement_matching FAILED [ 25%]
+tests/integration/test_membership_rebalance.py::test_readability_during_active_rebalance PASSED [ 26%]
+tests/integration/test_membership_rebalance.py::test_no_premature_deletion_of_source_replicas PASSED [ 27%]
+tests/integration/test_membership_rebalance.py::test_resumed_rebalance_after_worker_restart FAILED [ 28%]
+tests/integration/test_metadata_raft.py::test_raft_three_node_leader_election PASSED [ 28%]
+tests/integration/test_metadata_raft.py::test_committed_manifest_visibility_across_nodes PASSED [ 29%]
+tests/integration/test_metadata_raft.py::test_follower_cannot_accept_writes PASSED [ 30%]
+tests/integration/test_metadata_raft.py::test_competing_writes_and_stale_update_rejection PASSED [ 31%]
+tests/integration/test_metadata_raft.py::test_follower_isolation_and_committed_state_recovery PASSED [ 32%]
+tests/integration/test_metadata_raft.py::test_leader_loss_and_re_election PASSED [ 33%]
+tests/integration/test_metadata_raft.py::test_tombstone_commit_and_invisibility PASSED [ 33%]
+tests/integration/test_single_node.py::test_put_requires_idempotency_key PASSED [ 34%]
+tests/integration/test_single_node.py::test_put_get_head_small_object PASSED [ 35%]
+tests/integration/test_single_node.py::test_idempotent_retry PASSED      [ 36%]
+tests/integration/test_single_node.py::test_delete_tombstone PASSED      [ 37%]
+tests/integration/test_single_node.py::test_checksum_corruption_detection_and_quarantine PASSED [ 38%]
+tests/integration/test_single_node.py::test_streamed_128mib_object PASSED [ 38%]
+tests/integration/test_single_node.py::test_metrics_endpoint PASSED      [ 39%]
+tests/unit/test_auth.py::TestCreateAuthToken::test_token_format_has_four_parts PASSED [ 40%]
+tests/unit/test_auth.py::TestCreateAuthToken::test_token_contains_node_id PASSED [ 41%]
+tests/unit/test_auth.py::TestCreateAuthToken::test_token_contains_timestamp PASSED [ 42%]
+tests/unit/test_auth.py::TestCreateAuthToken::test_token_contains_nonce PASSED [ 42%]
+tests/unit/test_auth.py::TestCreateAuthToken::test_different_calls_produce_different_nonces PASSED [ 43%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_valid_token_verifies PASSED [ 44%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_absent_token_rejected PASSED [ 45%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_empty_token_rejected PASSED [ 46%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_malformed_token_rejected PASSED [ 47%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_wrong_secret_rejected PASSED [ 47%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_wrong_method_rejected PASSED [ 48%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_wrong_path_rejected PASSED [ 49%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_expired_token_rejected PASSED [ 50%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_tampered_signature_rejected PASSED [ 51%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_replay_protection PASSED [ 52%]
+tests/unit/test_auth.py::TestVerifyAuthToken::test_different_valid_tokens_both_verify PASSED [ 52%]
+tests/unit/test_auth.py::TestBodyHash::test_empty_body_hash PASSED       [ 53%]
+tests/unit/test_auth.py::TestBodyHash::test_consistent_hash PASSED       [ 54%]
+tests/unit/test_auth.py::TestBodyHash::test_different_data_different_hash PASSED [ 55%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[0] PASSED [ 56%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[1] PASSED [ 57%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[3] PASSED [ 57%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[4] PASSED [ 58%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[15] PASSED [ 59%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[16] PASSED [ 60%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[1024] PASSED [ 61%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[65537] PASSED [ 61%]
+tests/unit/test_erasure_coding.py::test_erasure_coding_encode_decode_correctness[1048576] PASSED [ 62%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_one_missing_fragment[0] PASSED [ 63%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_one_missing_fragment[1] PASSED [ 64%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_one_missing_fragment[2] PASSED [ 65%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_one_missing_fragment[3] PASSED [ 66%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_one_missing_fragment[4] PASSED [ 66%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_one_missing_fragment[5] PASSED [ 67%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_two_missing_fragments[missing_pair0] PASSED [ 68%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_two_missing_fragments[missing_pair1] PASSED [ 69%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_two_missing_fragments[missing_pair2] PASSED [ 70%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_two_missing_fragments[missing_pair3] PASSED [ 71%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_two_missing_fragments[missing_pair4] PASSED [ 71%]
+tests/unit/test_erasure_coding.py::test_reconstruction_with_two_missing_fragments[missing_pair5] PASSED [ 72%]
+tests/unit/test_erasure_coding.py::test_failed_read_with_fewer_than_four_valid_fragments[0] PASSED [ 73%]
+tests/unit/test_erasure_coding.py::test_failed_read_with_fewer_than_four_valid_fragments[1] PASSED [ 74%]
+tests/unit/test_erasure_coding.py::test_failed_read_with_fewer_than_four_valid_fragments[2] PASSED [ 75%]
+tests/unit/test_erasure_coding.py::test_failed_read_with_fewer_than_four_valid_fragments[3] PASSED [ 76%]
+tests/unit/test_erasure_coding.py::test_reconstruct_single_fragment_for_repair[0] PASSED [ 76%]
+tests/unit/test_erasure_coding.py::test_reconstruct_single_fragment_for_repair[1] PASSED [ 77%]
+tests/unit/test_erasure_coding.py::test_reconstruct_single_fragment_for_repair[2] PASSED [ 78%]
+tests/unit/test_erasure_coding.py::test_reconstruct_single_fragment_for_repair[3] PASSED [ 79%]
+tests/unit/test_erasure_coding.py::test_reconstruct_single_fragment_for_repair[4] PASSED [ 80%]
+tests/unit/test_erasure_coding.py::test_reconstruct_single_fragment_for_repair[5] PASSED [ 80%]
+tests/unit/test_erasure_coding.py::test_corrupt_fragment_detected_and_isolated PASSED [ 81%]
+tests/unit/test_placement.py::test_deterministic_placement PASSED        [ 82%]
+tests/unit/test_placement.py::test_no_duplicate_node_selection PASSED    [ 83%]
+tests/unit/test_placement.py::test_zone_separation_prioritization PASSED [ 84%]
+tests/unit/test_placement.py::test_multi_region_prioritization PASSED    [ 85%]
+tests/unit/test_placement.py::test_placement_stability_unchanged_membership PASSED [ 85%]
+tests/unit/test_placement.py::test_reject_impossible_policy_insufficient_nodes PASSED [ 86%]
+tests/unit/test_placement.py::test_reject_impossible_policy_insufficient_zones PASSED [ 87%]
+tests/unit/test_placement.py::test_policy_strict_consistency_validation PASSED [ 88%]
+tests/unit/test_placement.py::test_capacity_weight_influences_hrw_selection PASSED [ 89%]
+tests/unit/test_smoke.py::test_package_metadata PASSED                   [ 90%]
+tests/unit/test_smoke.py::test_project_rules_exists PASSED               [ 90%]
+tests/unit/test_smoke.py::test_policies_config_structure PASSED          [ 91%]
+tests/unit/test_smoke.py::test_cluster_config_structure PASSED           [ 92%]
+tests/unit/test_storage_regression.py::test_storage_node_health_endpoint_does_not_crash PASSED [ 93%]
+tests/unit/test_storage_regression.py::test_put_chunk_without_auth_returns_401 PASSED [ 94%]
+tests/unit/test_storage_regression.py::test_get_chunk_without_auth_returns_401 PASSED [ 95%]
+tests/unit/test_storage_regression.py::test_head_chunk_without_auth_returns_401 PASSED [ 95%]
+tests/unit/test_storage_regression.py::test_delete_chunk_without_auth_returns_401 PASSED [ 96%]
+tests/unit/test_storage_regression.py::test_admin_scan_without_auth_returns_401 PASSED [ 97%]
+tests/unit/test_storage_regression.py::test_put_chunk_with_invalid_auth_returns_403 PASSED [ 98%]
+tests/unit/test_storage_regression.py::test_put_chunk_with_valid_auth_succeeds PASSED [ 99%]
+tests/unit/test_storage_regression.py::test_get_chunk_with_valid_auth_succeeds PASSED [100%]
+
+================================== FAILURES ===================================
+______________ test_archive_automatic_background_fragment_repair ______________
+
+archive_cluster_env = {'cluster': ClusterConfig(cluster_id='vault-archive-cluster', metadata_nodes=[], storage_nodes=[StorageNodeConfig(node... 0x000002099b481010>, 'raft_sm': <vault_core.metadata_raft.RaftMetadataStateMachine object at 0x000002099b46de50>, ...}
+
+    @pytest.mark.asyncio
+    async def test_archive_automatic_background_fragment_repair(archive_cluster_env):
+        """
+        Test that:
+        1. Fragment corruption directly on disk is detected via SHA-256.
+        2. Read request succeeds via surviving fragments.
+        3. The repair worker reconstructs the damaged fragment from surviving fragments.
+        4. The repaired fragment's hash is verified and restored onto the node.
+        5. The cluster audit confirms all 6 fragments return to HEALTHY state.
+        """
+        env = archive_cluster_env
+        gw_client = httpx.AsyncClient(transport=env["gateway_transport"], base_url="http://gateway:8000")
+    
+        payload = b"Bit rot corruption repair in Reed-Solomon erasure coding background worker!" * 120
+        expected_sha = hashlib.sha256(payload).hexdigest()
+    
+        put_resp = await gw_client.put(
+            "/v1/objects/archive-bucket/repair-test.bin",
+            content=payload,
+            headers={"Idempotency-Key": "repair-test-put", "X-Vault-Policy": "archive"}
+        )
+        assert put_resp.status_code == 201
+        version_id = put_resp.json()["version_id"]
+    
+        manifest_dict = env["raft_sm"].get_latest_manifest("archive-bucket", "repair-test.bin")
+        manifest = ObjectManifest.model_validate(manifest_dict)
+        target_frag = manifest.chunks[0].fragments[2]  # Target fragment index 2
+    
+        # Directly corrupt fragment 2 on its physical storage node disk
+        node_dir = env["storage_dirs"][target_frag.node_id]
+        chunk_path = node_dir / "chunks" / "archive-bucket" / version_id / "chunk_2.dat"
+        assert chunk_path.is_file(), f"Chunk file {chunk_path} must exist"
+    
+        # Flip bytes directly
+        with open(chunk_path, "r+b") as f:
+            data = bytearray(f.read())
+            data[0] ^= 0xFF
+            f.seek(0)
+            f.write(data)
+    
+        # 1. Audit object - should detect CORRUPT for fragment 2
+        audit_resp = await gw_client.get("/v1/objects/archive-bucket/repair-test.bin/audit")
+        assert audit_resp.status_code == 200
+        audit_data = audit_resp.json()
+        corrupt_audits = [a for a in audit_data["replicas"] if a["state"] == "corrupt"]
+        assert len(corrupt_audits) == 1
+        assert corrupt_audits[0]["chunk_index"] == 2
+        assert corrupt_audits[0]["node_id"] == target_frag.node_id
+    
+        # 2. Read request succeeds seamlessly despite the corruption (reconstructed from the 5 healthy frags)
+        get_resp = await gw_client.get("/v1/objects/archive-bucket/repair-test.bin")
+        assert get_resp.status_code == 200
+        assert get_resp.content == payload
+    
+        # 3. Trigger repair worker audit scan and verify task is queued (via read repair or audit)
+        await env["repair_worker"].scan_and_enqueue_degraded_objects()
+        assert env["repair_worker"].queue_size() >= 1
+    
+        success_count = await env["repair_worker"].repair_all()
+        assert success_count >= 1
+    
+        # 4. Re-audit object - all 6 fragments must now be HEALTHY!
+        audit_resp_post = await gw_client.get("/v1/objects/archive-bucket/repair-test.bin/audit")
+        assert audit_resp_post.status_code == 200
+        audit_data_post = audit_resp_post.json()
+>       assert audit_data_post["healthy_count"] == 6
+E       assert 5 == 6
+
+tests\integration\test_archive_policy.py:401: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": "2026-09-26T00:12:50.462Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 201 in 157.45ms", "request_id": "2e0135d4-9c65-4aed-a7ee-cf6785e5942e", "status_code": 201, "duration_ms": 157.45, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.470Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 201 in 157.78ms", "request_id": "e9072f7d-9b71-4e66-91f4-f70eb3137ec3", "status_code": 201, "duration_ms": 157.78, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.470Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 201 in 157.80ms", "request_id": "12adfb08-35f9-4930-8d1c-342c316acb8c", "status_code": 201, "duration_ms": 157.8, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.470Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 201 in 157.62ms", "request_id": "977afb15-dee9-4179-adeb-d454a174f6d6", "status_code": 201, "duration_ms": 157.62, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.470Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 201 in 157.46ms", "request_id": "d0121d68-b40d-4218-80ac-e4c4640dea0c", "status_code": 201, "duration_ms": 157.46, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.470Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 201 in 157.21ms", "request_id": "703c3924-a75a-42f3-af2b-21a508f65366", "status_code": 201, "duration_ms": 157.21, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.565Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/archive-bucket/repair-test.bin -> 201 in 271.42ms", "request_id": "4f47d501-50e0-4302-89aa-0488ce57e73c", "status_code": 201, "duration_ms": 271.42, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.573Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 200 in 3.34ms", "request_id": "361f7a20-e0b5-4e94-b3dd-de6dfea33f91", "status_code": 200, "duration_ms": 3.34, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.581Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 200 in 3.87ms", "request_id": "e42323dd-35d1-412b-9237-9a9f9c4d9c8e", "status_code": 200, "duration_ms": 3.87, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.588Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 200 in 3.29ms", "request_id": "da63c4a2-3945-4b19-b027-f731f4e9e821", "status_code": 200, "duration_ms": 3.29, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.588Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 200 in 3.13ms", "request_id": "07bf09f1-a309-4c80-8caa-c9940a5a1638", "status_code": 200, "duration_ms": 3.13, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.604Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 200 in 4.59ms", "request_id": "21961c32-8c66-481e-b1cb-5360ae8d9adf", "status_code": 200, "duration_ms": 4.59, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.606Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 200 in 2.85ms", "request_id": "cae271db-a85c-4b79-9525-e24a8a5e610e", "status_code": 200, "duration_ms": 2.85, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.606Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/archive-bucket/repair-test.bin/audit -> 200 in 40.09ms", "request_id": "739b1a5b-7194-4cb6-8abe-3a5c2efe6911", "status_code": 200, "duration_ms": 40.09, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.626Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 200 in 11.58ms", "request_id": "b82b6851-512b-48de-bdce-b218e9eecf60", "status_code": 200, "duration_ms": 11.58, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.626Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 200 in 11.63ms", "request_id": "e5a5a447-df2a-4250-9cfb-01d67f7a5af9", "status_code": 200, "duration_ms": 11.63, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.626Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 410 in 11.63ms", "request_id": "bf3dc389-9c52-4f29-9f11-2af975e116ac", "status_code": 410, "duration_ms": 11.63, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.626Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 200 in 11.88ms", "request_id": "ab0e31db-3de4-4110-9d83-23a8597f36b4", "status_code": 200, "duration_ms": 11.88, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 200 in 11.95ms", "request_id": "1ff51c52-1cc7-49b5-84ac-906922681948", "status_code": 200, "duration_ms": 11.95, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 200 in 12.52ms", "request_id": "de987fe7-00bc-482a-817c-d720b1710a23", "status_code": 200, "duration_ms": 12.52, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "ERROR", "logger": "vault", "message": "Node storage-6 reported chunk 2 quarantined/corrupt"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for archive-bucket/repair-test.bin chunk 2 on storage-6 (state=corrupt_or_missing, surviving=5, backlog=1)"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/archive-bucket/repair-test.bin -> 200 in 28.21ms", "request_id": "2cd21c04-1df1-4b81-9f80-b361197be4ff", "status_code": 200, "duration_ms": 28.21, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 403 in 1.05ms", "request_id": "1730b407-828e-43f8-9724-e36f57962c04", "status_code": 403, "duration_ms": 1.05, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1"}
+{"timestamp": "2026-09-26T00:12:50.632Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 403 in 0.89ms", "request_id": "4a87a301-885c-4dd7-9c5f-8cf8a855c633", "status_code": 403, "duration_ms": 0.89, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.647Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2"}
+{"timestamp": "2026-09-26T00:12:50.647Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 403 in 1.76ms", "request_id": "24314d90-3d45-4c31-9f8b-e24a0af50c46", "status_code": 403, "duration_ms": 1.76, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.647Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3"}
+{"timestamp": "2026-09-26T00:12:50.647Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 403 in 0.85ms", "request_id": "2ef5df40-c4f9-4fcb-a9b4-451c196c6a2f", "status_code": 403, "duration_ms": 0.85, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.653Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4"}
+{"timestamp": "2026-09-26T00:12:50.654Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 403 in 1.02ms", "request_id": "1cc38cd4-c9d0-4705-9794-4ffab71eea04", "status_code": 403, "duration_ms": 1.02, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 403 in 1.04ms", "request_id": "8e94750b-02c9-4630-82b7-244cf175a314", "status_code": 403, "duration_ms": 1.04, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for archive-bucket/repair-test.bin chunk 0 on storage-4 (state=unreachable, surviving=0, backlog=2)"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for archive-bucket/repair-test.bin chunk 1 on storage-2 (state=unreachable, surviving=0, backlog=3)"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for archive-bucket/repair-test.bin chunk 3 on storage-3 (state=unreachable, surviving=0, backlog=4)"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for archive-bucket/repair-test.bin chunk 4 on storage-1 (state=unreachable, surviving=0, backlog=5)"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for archive-bucket/repair-test.bin chunk 5 on storage-5 (state=unreachable, surviving=0, backlog=6)"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 403 in 1.05ms", "request_id": "f2d02d84-dd96-4a5e-a073-ca12eb070bc0", "status_code": 403, "duration_ms": 1.05, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 403 in 0.97ms", "request_id": "1b31db13-5c5a-4923-9e2f-c74731382837", "status_code": 403, "duration_ms": 0.97, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.655Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3"}
+{"timestamp": "2026-09-26T00:12:50.664Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 403 in 1.13ms", "request_id": "972a5175-ca2b-4db8-93c7-964054cc9128", "status_code": 403, "duration_ms": 1.13, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.665Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4"}
+{"timestamp": "2026-09-26T00:12:50.665Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 403 in 1.25ms", "request_id": "0de45365-e464-4069-bf4d-cdec7ce5683f", "status_code": 403, "duration_ms": 1.25, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.665Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5"}
+{"timestamp": "2026-09-26T00:12:50.665Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 403 in 1.02ms", "request_id": "b2b5c9e3-8ff5-41af-a291-eb971a058710", "status_code": 403, "duration_ms": 1.02, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.665Z", "level": "ERROR", "logger": "vault", "message": "Cannot repair EC fragment 0: only 0 valid fragments"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 403 in 0.70ms", "request_id": "373b43c8-950b-47d9-aa36-0575a8295297", "status_code": 403, "duration_ms": 0.7, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 403 in 0.61ms", "request_id": "a66fd2f6-d332-469b-a468-29c3b40d510d", "status_code": 403, "duration_ms": 0.61, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 403 in 0.54ms", "request_id": "b9e8b178-d8fe-407f-88ca-683bd91bae04", "status_code": 403, "duration_ms": 0.54, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 403 in 0.61ms", "request_id": "78e7b5eb-8ec8-434c-87d0-8b13c6e8c1ab", "status_code": 403, "duration_ms": 0.61, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.724Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5"}
+{"timestamp": "2026-09-26T00:12:50.732Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 403 in 0.94ms", "request_id": "199e109e-5a9c-4748-aabc-928c273db501", "status_code": 403, "duration_ms": 0.94, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.732Z", "level": "ERROR", "logger": "vault", "message": "Cannot repair EC fragment 1: only 0 valid fragments"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 403 in 1.72ms", "request_id": "ad68dbf9-c338-42b7-8169-3e6eb03c9ad8", "status_code": 403, "duration_ms": 1.72, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 403 in 1.44ms", "request_id": "3801e1e9-11fe-4bf3-8102-1c5c8604c482", "status_code": 403, "duration_ms": 1.44, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 403 in 1.11ms", "request_id": "26404d1a-f93d-4c5b-8c45-42ac5dd0e853", "status_code": 403, "duration_ms": 1.11, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 403 in 1.36ms", "request_id": "746ec924-c386-4acf-b6fc-f7d5b4b00af8", "status_code": 403, "duration_ms": 1.36, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 403 in 0.86ms", "request_id": "2e9f7c1b-4d36-4723-a481-60ea5650c9dc", "status_code": 403, "duration_ms": 0.86, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.806Z", "level": "ERROR", "logger": "vault", "message": "Cannot repair EC fragment 5: only 0 valid fragments"}
+{"timestamp": "2026-09-26T00:12:50.871Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0"}
+{"timestamp": "2026-09-26T00:12:50.871Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 403 in 1.31ms", "request_id": "7863b648-d07b-4d9e-ba5d-56f641811d70", "status_code": 403, "duration_ms": 1.31, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.871Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1"}
+{"timestamp": "2026-09-26T00:12:50.871Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 403 in 1.10ms", "request_id": "7bfe6b3e-afe4-413a-8a5c-9af1954836f7", "status_code": 403, "duration_ms": 1.1, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.871Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2"}
+{"timestamp": "2026-09-26T00:12:50.871Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 403 in 1.18ms", "request_id": "1de5fafc-6676-4940-bf33-8ca5ad2c4376", "status_code": 403, "duration_ms": 1.18, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.881Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3"}
+{"timestamp": "2026-09-26T00:12:50.881Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 403 in 3.04ms", "request_id": "4664b2ae-a2ee-44ef-a5cb-5ac0b8d21a90", "status_code": 403, "duration_ms": 3.04, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.881Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5"}
+{"timestamp": "2026-09-26T00:12:50.881Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 403 in 1.16ms", "request_id": "30bf1366-26a4-4a07-a2ea-66a1a46c959b", "status_code": 403, "duration_ms": 1.16, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.889Z", "level": "ERROR", "logger": "vault", "message": "Cannot repair EC fragment 4: only 0 valid fragments"}
+{"timestamp": "2026-09-26T00:12:50.951Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0"}
+{"timestamp": "2026-09-26T00:12:50.952Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 403 in 2.21ms", "request_id": "461660a7-3639-451b-b8cf-0e9bcec601e0", "status_code": 403, "duration_ms": 2.21, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 403 in 1.23ms", "request_id": "c9f79ac1-3008-4c39-bc2c-90c31cbc9695", "status_code": 403, "duration_ms": 1.23, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 403 in 1.12ms", "request_id": "740c6e3e-e89b-46cb-98b1-012176b7f08d", "status_code": 403, "duration_ms": 1.12, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 403 in 1.13ms", "request_id": "863cec69-0c2a-4173-b3b2-7dc1d9691c1a", "status_code": 403, "duration_ms": 1.13, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 403 in 0.99ms", "request_id": "f0aba6fb-25f8-48a9-89e3-cdc4d76d7c76", "status_code": 403, "duration_ms": 0.99, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:50.955Z", "level": "ERROR", "logger": "vault", "message": "Cannot repair EC fragment 3: only 0 valid fragments"}
+{"timestamp": "2026-09-26T00:12:51.016Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0"}
+{"timestamp": "2026-09-26T00:12:51.016Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 403 in 1.46ms", "request_id": "9c0b6fb7-866f-4263-99c1-6eefa2f1aba0", "status_code": 403, "duration_ms": 1.46, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.016Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1"}
+{"timestamp": "2026-09-26T00:12:51.016Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 403 in 0.83ms", "request_id": "e6e1a345-91b1-4753-90fc-3ff47e6905a8", "status_code": 403, "duration_ms": 0.83, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.016Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3"}
+{"timestamp": "2026-09-26T00:12:51.016Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 403 in 0.82ms", "request_id": "d3e634a7-ff68-4d02-9af4-1084ae143c6a", "status_code": 403, "duration_ms": 0.82, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.016Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4"}
+{"timestamp": "2026-09-26T00:12:51.024Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 403 in 0.75ms", "request_id": "d53018e1-7771-4ee2-a3ec-5f91c9cd9f70", "status_code": 403, "duration_ms": 0.75, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.024Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5"}
+{"timestamp": "2026-09-26T00:12:51.024Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 403 in 0.70ms", "request_id": "c41fd2c8-f8da-41b1-8496-72e22e246562", "status_code": 403, "duration_ms": 0.7, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.024Z", "level": "ERROR", "logger": "vault", "message": "Cannot repair EC fragment 2: only 0 valid fragments"}
+{"timestamp": "2026-09-26T00:12:51.106Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/0 -> 200 in 1.31ms", "request_id": "360b060c-9444-4f5a-8260-bab83244f1a5", "status_code": 200, "duration_ms": 1.31, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.106Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/1 -> 200 in 0.83ms", "request_id": "21b1c7be-042a-4998-93b9-b7995dc527d6", "status_code": 200, "duration_ms": 0.83, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.106Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/2 -> 404 in 0.62ms", "request_id": "dd417d2f-2534-480d-a465-e8fd788af871", "status_code": 404, "duration_ms": 0.62, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.106Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/3 -> 200 in 0.80ms", "request_id": "646db557-1928-442b-9c87-764698480b68", "status_code": 200, "duration_ms": 0.8, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.106Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/4 -> 200 in 0.74ms", "request_id": "7a3fe724-0f63-4192-9646-a1d2c402a948", "status_code": 200, "duration_ms": 0.74, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.116Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/archive-bucket/96422351-49c9-45e4-87b5-462a99de16e5/5 -> 200 in 2.33ms", "request_id": "3353b834-2213-4537-9907-6446ca4a35cf", "status_code": 200, "duration_ms": 2.33, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:12:51.116Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/archive-bucket/repair-test.bin/audit -> 200 in 12.64ms", "request_id": "c9aa005d-6203-41b9-9f8a-253eba611f3b", "status_code": 200, "duration_ms": 12.64, "client_ip": "127.0.0.1"}
+_______________ test_replica_inventory_audit_convergence_states _______________
+
+cluster_env = {'cluster': ClusterConfig(cluster_id='vault-test-cluster', metadata_nodes=[], storage_nodes=[StorageNodeConfig(node_id... 0x000002099b71d280>, 'raft_sm': <vault_core.metadata_raft.RaftMetadataStateMachine object at 0x000002099b896d20>, ...}
+
+    @pytest.mark.asyncio
+    async def test_replica_inventory_audit_convergence_states(cluster_env):
+        """
+        Test replica inventory audit endpoint comparing physical storage nodes against Raft manifest.
+        Verifies detection of:
+        - HEALTHY: current version on disk matches checksum.
+        - STALE: node holds superseded historical version.
+        - CORRUPT: node holds corrupted chunk bytes.
+        - UNREACHABLE: node is offline.
+        """
+        gw_transport = cluster_env["gateway_transport"]
+        net_transport: MultiNodeHttpTransport = cluster_env["transport"]
+        storage_dirs = cluster_env["storage_dirs"]
+        bucket = "audit-bucket"
+        key = "assets/logo.png"
+    
+        async with httpx.AsyncClient(transport=gw_transport, base_url="http://gateway:8000") as client:
+            # Step 1: Upload version 1
+            put_v1 = await client.put(
+                f"/v1/objects/{bucket}/{key}",
+                content=b"LOGO_V1_INITIAL_ASSET",
+                headers={"X-Idempotency-Key": "audit-v1"}
+            )
+            assert put_v1.status_code == 201
+            v1_id = put_v1.headers["X-Vault-Version-Id"]
+    
+            # Step 2: Upload version 2
+            put_v2 = await client.put(
+                f"/v1/objects/{bucket}/{key}",
+                content=b"LOGO_V2_REDESIGNED_ASSET",
+                headers={
+                    "X-Idempotency-Key": "audit-v2",
+                    "X-Expected-Version": "1",
+                }
+            )
+            assert put_v2.status_code == 201
+            v2_id = put_v2.headers["X-Vault-Version-Id"]
+    
+            # Step 3: Run baseline audit; all target replicas should be HEALTHY
+            audit_resp1 = await client.get(f"/v1/objects/{bucket}/{key}/audit")
+            assert audit_resp1.status_code == 200
+            data1 = audit_resp1.json()
+            assert data1["healthy_count"] == 3
+            assert data1["stale_count"] == 0
+            assert data1["corrupt_count"] == 0
+            assert data1["unreachable_count"] == 0
+    
+            # Step 4: Induce heterogeneous replica states
+            target_audits = data1["replicas"]
+            node_stale = target_audits[0]["node_id"]
+            node_corrupt = target_audits[1]["node_id"]
+            node_offline = target_audits[2]["node_id"]
+    
+            # Ensure node_stale holds the superseded v1 chunk, and does not have the current v2 chunk
+            v1_chunk_stale = storage_dirs[node_stale] / "chunks" / bucket / v1_id / "chunk_0.dat"
+            v1_chunk_stale.parent.mkdir(parents=True, exist_ok=True)
+            v1_chunk_stale.write_bytes(b"LOGO_V1_INITIAL_ASSET")
+    
+            v2_chunk_stale = storage_dirs[node_stale] / "chunks" / bucket / v2_id / "chunk_0.dat"
+            if v2_chunk_stale.is_file():
+                v2_chunk_stale.unlink()
+    
+            # Make node_corrupt hold corrupt bytes for v2
+            v2_chunk_corrupt = storage_dirs[node_corrupt] / "chunks" / bucket / v2_id / "chunk_0.dat"
+            v2_chunk_corrupt.write_bytes(b"CORRUPTED_DISK_SECTOR_BYTES")
+    
+            # Make node_offline unreachable
+            net_transport.stop_node(node_offline)
+    
+            # Step 5: Execute audit again and assert convergence states
+            audit_resp2 = await client.get(f"/v1/objects/{bucket}/{key}/audit")
+            assert audit_resp2.status_code == 200
+            data2 = audit_resp2.json()
+    
+            replica_states = {r["node_id"]: r["state"] for r in data2["replicas"]}
+    
+>           assert replica_states[node_stale] == ReplicaState.STALE
+E           AssertionError: assert 'missing' == <ReplicaState.STALE: 'stale'>
+E             
+E             - stale
+E             + missing
+
+tests\integration\test_consistency_versioning.py:477: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": "2026-09-26T00:13:21.298Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/audit-bucket/6b6f6211-d8d5-454e-839f-12c89fc8780a/0 -> 201 in 216.14ms", "request_id": "03c72155-96bc-433b-b941-c087e0e04993", "status_code": 201, "duration_ms": 216.14, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.298Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/audit-bucket/6b6f6211-d8d5-454e-839f-12c89fc8780a/0 -> 201 in 216.30ms", "request_id": "a34816a3-c0c5-436e-8959-645dfcba9d5f", "status_code": 201, "duration_ms": 216.3, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.298Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/audit-bucket/6b6f6211-d8d5-454e-839f-12c89fc8780a/0 -> 201 in 216.14ms", "request_id": "68e22bf2-95fe-42aa-9b22-52e43314a5fb", "status_code": 201, "duration_ms": 216.14, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.398Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/audit-bucket/assets/logo.png -> 201 in 327.04ms", "request_id": "8f05a661-dfe7-4681-9b9d-22af4f7f3047", "status_code": 201, "duration_ms": 327.04, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.492Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 201 in 88.78ms", "request_id": "d334ba9b-f7a2-4929-8303-4aed96da0f3a", "status_code": 201, "duration_ms": 88.78, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.492Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 201 in 88.36ms", "request_id": "a65fa690-7e1a-46b2-b7dc-f513e7621d0a", "status_code": 201, "duration_ms": 88.36, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.492Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 201 in 88.07ms", "request_id": "b0e577fc-e767-4bc8-ae0e-fd09812a5108", "status_code": 201, "duration_ms": 88.07, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.582Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/audit-bucket/assets/logo.png -> 201 in 182.07ms", "request_id": "314aa261-8363-4063-8fe0-42a774ebd9a2", "status_code": 201, "duration_ms": 182.07, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.593Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 200 in 3.54ms", "request_id": "b5b49345-1f1b-43ff-a6e5-e712089389be", "status_code": 200, "duration_ms": 3.54, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.593Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 200 in 3.15ms", "request_id": "afdc175f-de95-4778-9f37-908207c0ae68", "status_code": 200, "duration_ms": 3.15, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.606Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 200 in 4.48ms", "request_id": "12b071f6-c8c8-4d5c-b795-acb46e888735", "status_code": 200, "duration_ms": 4.48, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.606Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/audit-bucket/assets/logo.png/audit -> 200 in 23.79ms", "request_id": "dc207278-2df2-4d3e-b54e-30c255c8a7f2", "status_code": 200, "duration_ms": 23.79, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.630Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 404 in 1.63ms", "request_id": "fbfc1fab-2255-47e9-9543-0375a7ab4af0", "status_code": 404, "duration_ms": 1.63, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.630Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for HEAD /v1/chunks/audit-bucket/6b6f6211-d8d5-454e-839f-12c89fc8780a/0"}
+{"timestamp": "2026-09-26T00:13:21.630Z", "level": "INFO", "logger": "vault", "message": "HEAD /v1/chunks/audit-bucket/6b6f6211-d8d5-454e-839f-12c89fc8780a/0 -> 403 in 2.78ms", "request_id": "1ce6b796-f2d1-443b-a359-d98f4b7f9e09", "status_code": 403, "duration_ms": 2.78, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.630Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/audit-bucket/618b6943-951a-4197-b628-3b26ecafff72/0 -> 200 in 2.02ms", "request_id": "3e8aee2b-0783-4e66-b808-d6796fa9fe8b", "status_code": 200, "duration_ms": 2.02, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:21.645Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/audit-bucket/assets/logo.png/audit -> 200 in 14.12ms", "request_id": "e5fab0a0-eafa-4ddb-b4f2-455b4ef44a7a", "status_code": 200, "duration_ms": 14.12, "client_ip": "127.0.0.1"}
+_______________ test_read_repair_enqueues_and_restores_replica ________________
+
+cluster_env = {'cluster': ClusterConfig(cluster_id='vault-test-cluster', metadata_nodes=[], storage_nodes=[StorageNodeConfig(node_id... 0x000002099b49c1a0>, 'raft_sm': <vault_core.metadata_raft.RaftMetadataStateMachine object at 0x000002099b3103b0>, ...}
+
+    @pytest.mark.asyncio
+    async def test_read_repair_enqueues_and_restores_replica(cluster_env):
+        """
+        Test read-repair workflow:
+        1. Object uploaded under Hot policy (RF=3).
+        2. One replica is corrupted on disk.
+        3. Client GET succeeds by reading surviving replica and enqueues corrupt replica.
+        4. Repair worker executes repair: verifies source hash, writes chunk to target, verifies destination hash.
+        5. Restored replica count returns to full replication factor (healthy_count == 3).
+        """
+        gw_transport = cluster_env["gateway_transport"]
+        storage_dirs = cluster_env["storage_dirs"]
+        gw_service: GatewayService = cluster_env["service"]
+    
+        bucket = "repair-test"
+        key = "documents/tax_filing.pdf"
+        payload = b"TAX_FILING_PAYLOAD_WITH_IMMUTABLE_HASH"
+    
+        async with httpx.AsyncClient(transport=gw_transport, base_url="http://gateway:8000") as client:
+            # 1. Upload object
+            put_resp = await client.put(
+                f"/v1/objects/{bucket}/{key}",
+                content=payload,
+                headers={"X-Idempotency-Key": "read-repair-init"}
+            )
+            assert put_resp.status_code == 201
+            v_id = put_resp.headers["X-Vault-Version-Id"]
+    
+            # 2. Audit initial healthy count
+            audit1 = await client.get(f"/v1/objects/{bucket}/{key}/audit")
+            assert audit1.json()["healthy_count"] == 3
+            corrupt_node = audit1.json()["replicas"][0]["node_id"]
+    
+            # 3. Corrupt one replica on disk
+            chunk_file = storage_dirs[corrupt_node] / "chunks" / bucket / v_id / "chunk_0.dat"
+            chunk_file.write_bytes(b"CORRUPTED_SILENT_ERROR")
+    
+            # 4. Client GET reads object (read repair triggers in background)
+            get_resp = await client.get(f"/v1/objects/{bucket}/{key}")
+            assert get_resp.status_code == 200
+            assert get_resp.content == payload
+    
+            # Allow background read repair task to enqueue
+            await asyncio.sleep(0.05)
+    
+            # 5. Verify repair worker has queued task and execute repair
+            assert gw_service.repair_worker is not None
+            assert gw_service.repair_worker._queue.qsize() >= 1
+    
+            processed = await gw_service.repair_worker.run_repair_cycle()
+            assert processed >= 1
+    
+            # 6. Verify restored replica count
+            audit2 = await client.get(f"/v1/objects/{bucket}/{key}/audit")
+            report = audit2.json()
+>           assert report["healthy_count"] == 3
+E           assert 2 == 3
+
+tests\integration\test_integrity_repair.py:250: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": "2026-09-26T00:13:25.824Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 201 in 60.32ms", "request_id": "fdd21754-5425-4810-9891-9f3dd2baab06", "status_code": 201, "duration_ms": 60.32, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.824Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 201 in 60.50ms", "request_id": "c701e120-8695-4893-8784-bd2d18130e57", "status_code": 201, "duration_ms": 60.5, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.824Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 201 in 60.42ms", "request_id": "2c1725ef-c378-484d-828a-29290936603c", "status_code": 201, "duration_ms": 60.42, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.896Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/repair-test/documents/tax_filing.pdf -> 201 in 138.31ms", "request_id": "0d9b0a48-e279-4872-8959-2bea427b4a51", "status_code": 201, "duration_ms": 138.31, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.905Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 200 in 3.53ms", "request_id": "3dedd618-abf3-4a90-a479-592456269cf2", "status_code": 200, "duration_ms": 3.53, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.913Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 200 in 2.32ms", "request_id": "8713293e-b432-4b4f-a784-c2f50e8b418d", "status_code": 200, "duration_ms": 2.32, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.913Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 200 in 3.22ms", "request_id": "fcb91fba-a0ea-4400-8943-6ba1acd1ee7d", "status_code": 200, "duration_ms": 3.22, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.921Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/repair-test/documents/tax_filing.pdf/audit -> 200 in 22.27ms", "request_id": "d561539e-8c61-4a63-91a1-023dcc18f10f", "status_code": 200, "duration_ms": 22.27, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.929Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/repair-test/documents/tax_filing.pdf -> 200 in 10.09ms", "request_id": "a2768a37-b662-4c0e-92b9-9bbe61d1ba3f", "status_code": 200, "duration_ms": 10.09, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.946Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 410 in 14.30ms", "request_id": "fa7a0699-1093-4497-8740-61650466982e", "status_code": 410, "duration_ms": 14.3, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.946Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 200 in 13.17ms", "request_id": "f53c78fc-09c5-4a49-a441-7aa4129387fe", "status_code": 200, "duration_ms": 13.17, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.946Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 200 in 13.00ms", "request_id": "cefccb71-2ac7-4e50-9ead-85f028be88d2", "status_code": 200, "duration_ms": 13.0, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:25.946Z", "level": "ERROR", "logger": "vault", "message": "Node storage-1 reported chunk 0 quarantined/corrupt"}
+{"timestamp": "2026-09-26T00:13:25.956Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for repair-test/documents/tax_filing.pdf chunk 0 on storage-1 (state=corrupt_or_missing, surviving=1, backlog=1)"}
+{"timestamp": "2026-09-26T00:13:26.016Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0"}
+{"timestamp": "2026-09-26T00:13:26.016Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 403 in 1.49ms", "request_id": "8e058d38-d687-4878-895b-9c1c60aa4a75", "status_code": 403, "duration_ms": 1.49, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:26.019Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0"}
+{"timestamp": "2026-09-26T00:13:26.019Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 403 in 2.04ms", "request_id": "5477f314-9b7a-4f3d-b1c4-d2e3f40094a2", "status_code": 403, "duration_ms": 2.04, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:26.019Z", "level": "ERROR", "logger": "vault", "message": "Repair impossible for repair-test/documents/tax_filing.pdf chunk 0: no healthy source"}
+{"timestamp": "2026-09-26T00:13:26.087Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 404 in 1.94ms", "request_id": "3793962d-9065-4367-9b03-c0372f572656", "status_code": 404, "duration_ms": 1.94, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:26.096Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 200 in 2.36ms", "request_id": "a970c269-3b7d-4fc3-a690-913e5b3c6d47", "status_code": 200, "duration_ms": 2.36, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:26.096Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/repair-test/524d3047-7b09-4511-a534-1a6b6998d1de/0 -> 200 in 2.12ms", "request_id": "fcae05fd-d729-41f4-994f-80e9a9cb5fee", "status_code": 200, "duration_ms": 2.12, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:26.096Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/repair-test/documents/tax_filing.pdf/audit -> 200 in 13.97ms", "request_id": "fa01f15f-14d5-4f6b-99c2-099ce87e00c1", "status_code": 200, "duration_ms": 13.97, "client_ip": "127.0.0.1"}
+_____________ test_cluster_audit_and_prioritized_repair_workflow ______________
+
+cluster_env = {'cluster': ClusterConfig(cluster_id='vault-test-cluster', metadata_nodes=[], storage_nodes=[StorageNodeConfig(node_id... 0x000002099b7a1e20>, 'raft_sm': <vault_core.metadata_raft.RaftMetadataStateMachine object at 0x000002099b8067e0>, ...}
+
+    @pytest.mark.asyncio
+    async def test_cluster_audit_and_prioritized_repair_workflow(cluster_env):
+        """
+        Test cluster-wide audit and priority ordering:
+        - Object A has 1 corrupt replica (surviving = 2, priority 2).
+        - Object B has 2 missing/corrupt replicas (surviving = 1, priority 1 - CRITICAL).
+        - Audit enqueues all degraded replicas.
+        - Object B is processed before Object A.
+        - Full replica counts are restored across all objects.
+        """
+        gw_transport = cluster_env["gateway_transport"]
+        storage_dirs = cluster_env["storage_dirs"]
+        gw_service: GatewayService = cluster_env["service"]
+    
+        bucket = "prioritized-repair"
+        key_a = "dataset-a.bin"
+        key_b = "dataset-b.bin"
+    
+        async with httpx.AsyncClient(transport=gw_transport, base_url="http://gateway:8000") as client:
+            # Upload Object A and Object B
+            put_a = await client.put(f"/v1/objects/{bucket}/{key_a}", content=b"DATA_SET_A_CONTENT", headers={"X-Idempotency-Key": "put-a"})
+            put_b = await client.put(f"/v1/objects/{bucket}/{key_b}", content=b"DATA_SET_B_CONTENT", headers={"X-Idempotency-Key": "put-b"})
+            assert put_a.status_code == 201 and put_b.status_code == 201
+    
+            v_a = put_a.headers["X-Vault-Version-Id"]
+            v_b = put_b.headers["X-Vault-Version-Id"]
+    
+            audit_a = (await client.get(f"/v1/objects/{bucket}/{key_a}/audit")).json()
+            audit_b = (await client.get(f"/v1/objects/{bucket}/{key_b}/audit")).json()
+    
+            # Object A: corrupt 1 node
+            node_a_1 = audit_a["replicas"][0]["node_id"]
+            (storage_dirs[node_a_1] / "chunks" / bucket / v_a / "chunk_0.dat").write_bytes(b"BAD_A")
+    
+            # Object B: corrupt 2 nodes (surviving = 1, highest priority!)
+            node_b_1 = audit_b["replicas"][0]["node_id"]
+            node_b_2 = audit_b["replicas"][1]["node_id"]
+            (storage_dirs[node_b_1] / "chunks" / bucket / v_b / "chunk_0.dat").write_bytes(b"BAD_B1")
+            (storage_dirs[node_b_2] / "chunks" / bucket / v_b / "chunk_0.dat").unlink()
+    
+            # Trigger cluster audit via admin endpoint
+            scan_resp = await client.post("/v1/admin/repair/scan")
+            assert scan_resp.status_code == 200
+            assert scan_resp.json()["enqueued_repairs"] >= 3
+    
+            # Verify priority queue order: Object B items must pop before Object A
+            q = gw_service.repair_worker._queue
+            first_task = await q.get()
+>           assert first_task.priority == 1, "Under-replicated Object B (surviving=1) must pop first!"
+E           AssertionError: Under-replicated Object B (surviving=1) must pop first!
+E           assert 0 == 1
+E            +  where 0 = PrioritizedRepairTask(priority=0, enqueued_at=1790381608.4203339, bucket='prioritized-repair', key='dataset-a.bin', version_id='ed957b42-c47f-468f-b7d6-20a2bc69acf0', chunk_index=0, failed_node_id='storage-5', expected_sha256='2d33dc3836fc992bdf9a8f2ee113e1cc46b64bde707a01d5996bc72ba9769aba', state='unreachable').priority
+
+tests\integration\test_integrity_repair.py:312: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": "2026-09-26T00:13:28.106Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 201 in 82.26ms", "request_id": "87da6266-2a85-4f19-983c-6fbfdcd3ec23", "status_code": 201, "duration_ms": 82.26, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.106Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 201 in 82.60ms", "request_id": "5a69888a-9e89-44a4-af48-eeba18292f59", "status_code": 201, "duration_ms": 82.6, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.106Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 201 in 82.62ms", "request_id": "13f4eee1-ac48-4c12-bb47-efaf4d7dae6f", "status_code": 201, "duration_ms": 82.62, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.205Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/prioritized-repair/dataset-a.bin -> 201 in 189.08ms", "request_id": "ec0ecd06-fcb0-4b7d-a1b8-db04a82fdbb3", "status_code": 201, "duration_ms": 189.08, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.282Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 201 in 72.50ms", "request_id": "ffbb5f03-0035-4fbe-9bfa-be5bc55eec5a", "status_code": 201, "duration_ms": 72.5, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.282Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 201 in 71.81ms", "request_id": "bf1a66a7-5e91-4ce2-9b41-22c491da8442", "status_code": 201, "duration_ms": 71.81, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.282Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 201 in 71.10ms", "request_id": "ef62ac0a-1275-46df-a612-b750ab100a8f", "status_code": 201, "duration_ms": 71.1, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.364Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/prioritized-repair/dataset-b.bin -> 201 in 157.01ms", "request_id": "a63c14f6-df0d-40be-bf6a-7c851b183db3", "status_code": 201, "duration_ms": 157.01, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.374Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 200 in 3.59ms", "request_id": "0a7d745f-9e7d-49c6-bdb8-b2a801f6156f", "status_code": 200, "duration_ms": 3.59, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.382Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 200 in 3.34ms", "request_id": "c7669dd7-19c0-4aff-af14-31232f30cba9", "status_code": 200, "duration_ms": 3.34, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.385Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 200 in 4.14ms", "request_id": "877ffc5e-e882-4023-9791-eaa7ed562237", "status_code": 200, "duration_ms": 4.14, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.385Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/prioritized-repair/dataset-a.bin/audit -> 200 in 23.25ms", "request_id": "3df446fb-91f1-4aeb-adfc-19c7524c46a8", "status_code": 200, "duration_ms": 23.25, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.394Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 200 in 2.36ms", "request_id": "ae3d5f23-f91c-4a45-8000-d37c2f880689", "status_code": 200, "duration_ms": 2.36, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.394Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 200 in 2.61ms", "request_id": "876db1c0-d791-43a3-997b-f2c648f9f930", "status_code": 200, "duration_ms": 2.61, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.402Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 200 in 4.12ms", "request_id": "9fc8aa74-93f2-41e3-a89e-c1773f209eef", "status_code": 200, "duration_ms": 4.12, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.402Z", "level": "INFO", "logger": "vault", "message": "GET /v1/objects/prioritized-repair/dataset-b.bin/audit -> 200 in 15.30ms", "request_id": "ed47f799-566b-4209-a20e-dbd7fb634c8d", "status_code": 200, "duration_ms": 15.3, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.411Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0"}
+{"timestamp": "2026-09-26T00:13:28.411Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 403 in 1.22ms", "request_id": "96e2f4ce-38ed-4b90-b863-bc74950a98eb", "status_code": 403, "duration_ms": 1.22, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 403 in 1.34ms", "request_id": "be786409-a487-47d1-a1cc-b3675732d38e", "status_code": 403, "duration_ms": 1.34, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/ed957b42-c47f-468f-b7d6-20a2bc69acf0/0 -> 403 in 1.10ms", "request_id": "9c390746-468b-4010-ab6f-f9fa63e4c5c6", "status_code": 403, "duration_ms": 1.1, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for prioritized-repair/dataset-a.bin chunk 0 on storage-5 (state=unreachable, surviving=0, backlog=1)"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for prioritized-repair/dataset-a.bin chunk 0 on storage-2 (state=unreachable, surviving=0, backlog=2)"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for prioritized-repair/dataset-a.bin chunk 0 on storage-3 (state=unreachable, surviving=0, backlog=3)"}
+{"timestamp": "2026-09-26T00:13:28.420Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0"}
+{"timestamp": "2026-09-26T00:13:28.428Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 403 in 1.09ms", "request_id": "e47c378d-28d9-4c6e-a44d-b91694992736", "status_code": 403, "duration_ms": 1.09, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.428Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0"}
+{"timestamp": "2026-09-26T00:13:28.428Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 403 in 1.53ms", "request_id": "fdf55d76-e1bd-48b3-a9c9-35ba2dca347e", "status_code": 403, "duration_ms": 1.53, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.428Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0"}
+{"timestamp": "2026-09-26T00:13:28.428Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/prioritized-repair/f4db3a3a-80e0-4f35-8de0-94dbdd974e9e/0 -> 403 in 1.11ms", "request_id": "d5b072f9-a1d8-4a1d-81d3-41b6302bb47b", "status_code": 403, "duration_ms": 1.11, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:28.435Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for prioritized-repair/dataset-b.bin chunk 0 on storage-2 (state=unreachable, surviving=0, backlog=4)"}
+{"timestamp": "2026-09-26T00:13:28.435Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for prioritized-repair/dataset-b.bin chunk 0 on storage-5 (state=unreachable, surviving=0, backlog=5)"}
+{"timestamp": "2026-09-26T00:13:28.435Z", "level": "INFO", "logger": "vault", "message": "Enqueued repair task for prioritized-repair/dataset-b.bin chunk 0 on storage-4 (state=unreachable, surviving=0, backlog=6)"}
+{"timestamp": "2026-09-26T00:13:28.435Z", "level": "INFO", "logger": "vault", "message": "POST /v1/admin/repair/scan -> 200 in 23.60ms", "request_id": "929b683c-407c-413a-b0e7-89c10fc998cf", "status_code": 200, "duration_ms": 23.6, "client_ip": "127.0.0.1"}
+__________ test_rebalance_trigger_and_rendezvous_placement_matching ___________
+
+rebalance_cluster_env = {'cluster': ClusterConfig(cluster_id='vault-rebalance-cluster', metadata_nodes=[], storage_nodes=[StorageNodeConfig(no..., data_write_quorum=2, data_read_quorum=1, data_fragments=None, parity_fragments=None, minimum_distinct_zones=3)}, ...}
+
+    @pytest.mark.asyncio
+    async def test_rebalance_trigger_and_rendezvous_placement_matching(rebalance_cluster_env):
+        """
+        Test that:
+        1. Upload objects with initial 6-node topology.
+        2. Register storage-7 (with its storage app mounted in transport).
+        3. Trigger rebalance via POST /v1/admin/rebalance.
+        4. Await completion and verify progress metrics.
+        5. Verify committed manifests in Raft match deterministic rendezvous placement!
+        """
+        env = rebalance_cluster_env
+        gw_client = httpx.AsyncClient(transport=env["gateway_transport"], base_url="http://gateway:8000")
+    
+        # Set up physical node storage-7 app and transport
+        node_7_dir = env["tmp_path"] / "storage-7"
+        node_7_settings = VaultSettings(data_dir=node_7_dir, chunk_size_bytes=8 * 1024 * 1024)
+        storage_app_7 = create_vault_app(node_7_settings)
+        env["transport"].add_node_transport("storage-7", httpx.ASGITransport(app=storage_app_7))
+    
+        # Upload 6 objects to distribute across nodes
+        uploaded_objects = []
+        for i in range(6):
+            obj_key = f"rebal/object-{i}.dat"
+            payload = f"Rebalance test content for object key {obj_key} with deterministic hashing!".encode("utf-8") * 50
+            put_resp = await gw_client.put(
+                f"/v1/objects/test-bucket/{obj_key}",
+                content=payload,
+                headers={"Idempotency-Key": f"rebal-put-{i}", "X-Vault-Policy": "hot"}
+            )
+            assert put_resp.status_code == 201
+            uploaded_objects.append((obj_key, payload))
+    
+        # Register storage-7 via Admin API
+        add_node_payload = {
+            "node_id": "storage-7",
+            "url": "http://storage-7:8001",
+            "region": "us-east-1",
+            "zone": "us-east-1a",
+            "active": True,
+            "capacity_weight": 2.0,  # Higher weight to attract chunks
+        }
+        await gw_client.post("/v1/admin/nodes", json=add_node_payload)
+    
+        # Trigger rebalance
+        rebal_resp = await gw_client.post("/v1/admin/rebalance", params={"rate_limit": 50.0})
+        assert rebal_resp.status_code == 202
+        assert rebal_resp.json()["total_tasks"] >= 0
+    
+        # Wait for rebalance to complete
+        start_wait = time.time()
+        while time.time() - start_wait < 8.0:
+            stat_resp = await gw_client.get("/v1/admin/rebalance/status")
+            stat = stat_resp.json()
+            if stat["status"] in ("completed", "idle") and stat["queued_tasks"] == 0:
+                break
+            await asyncio.sleep(0.1)
+    
+        final_stat = (await gw_client.get("/v1/admin/rebalance/status")).json()
+>       assert final_stat["status"] == "completed"
+E       AssertionError: assert 'failed' == 'completed'
+E         
+E         - completed
+E         + failed
+
+tests\integration\test_membership_rebalance.py:279: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": "2026-09-26T00:13:34.754Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/150a30dd-ea00-47bf-b9cc-cdb71da9a856/0 -> 201 in 72.42ms", "request_id": "d14c25b6-92d4-4fd2-9459-fab401144e2b", "status_code": 201, "duration_ms": 72.42, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:34.754Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/150a30dd-ea00-47bf-b9cc-cdb71da9a856/0 -> 201 in 72.79ms", "request_id": "65338b28-fce9-4c9d-8bdd-390de47b64c7", "status_code": 201, "duration_ms": 72.79, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:34.754Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/150a30dd-ea00-47bf-b9cc-cdb71da9a856/0 -> 201 in 72.07ms", "request_id": "3eb1b4ef-38a8-44d5-acb7-c8694df602ce", "status_code": 201, "duration_ms": 72.07, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:34.851Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/rebal/object-0.dat -> 201 in 177.65ms", "request_id": "df257890-9353-4b59-8ca2-3e91aa97fe87", "status_code": 201, "duration_ms": 177.65, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:34.930Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/26c83e78-ad55-427e-9c56-b75ce006f88d/0 -> 201 in 72.68ms", "request_id": "23f6ca92-3a51-4995-bc9c-f3db9fe2635b", "status_code": 201, "duration_ms": 72.68, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:34.930Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/26c83e78-ad55-427e-9c56-b75ce006f88d/0 -> 201 in 72.80ms", "request_id": "b32e3029-86a8-4af7-920b-d8160f42b593", "status_code": 201, "duration_ms": 72.8, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:34.930Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/26c83e78-ad55-427e-9c56-b75ce006f88d/0 -> 201 in 72.14ms", "request_id": "81995bce-b0d8-41c8-9067-f2db2a27b7cf", "status_code": 201, "duration_ms": 72.14, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.020Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/rebal/object-1.dat -> 201 in 165.75ms", "request_id": "0d365eda-413a-4b7f-8521-d258977b01e0", "status_code": 201, "duration_ms": 165.75, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.109Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/5c4eb22b-6de9-4a44-a121-ac3713aa7c9d/0 -> 201 in 84.03ms", "request_id": "a9579bcb-39c8-43f3-a4f6-abeae812c8d7", "status_code": 201, "duration_ms": 84.03, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.109Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/5c4eb22b-6de9-4a44-a121-ac3713aa7c9d/0 -> 201 in 84.26ms", "request_id": "2047da70-89c9-47fa-8823-7a4490a2b91a", "status_code": 201, "duration_ms": 84.26, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.109Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/5c4eb22b-6de9-4a44-a121-ac3713aa7c9d/0 -> 201 in 84.07ms", "request_id": "15c8afcb-5adf-4157-93b2-d00ed623bb83", "status_code": 201, "duration_ms": 84.07, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.202Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/rebal/object-2.dat -> 201 in 179.82ms", "request_id": "89f33e99-c510-4eb6-8e02-5959455cb171", "status_code": 201, "duration_ms": 179.82, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.250Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0 -> 201 in 44.15ms", "request_id": "1ebcc104-aaeb-4bd3-a0c7-2bb0d6b1d62e", "status_code": 201, "duration_ms": 44.15, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.250Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0 -> 201 in 44.51ms", "request_id": "4896aacd-780b-41dc-8b37-a62214ff0a0b", "status_code": 201, "duration_ms": 44.51, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.250Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0 -> 201 in 44.30ms", "request_id": "3ec028c2-65db-4dcd-a157-77b012bb3779", "status_code": 201, "duration_ms": 44.3, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.334Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/rebal/object-3.dat -> 201 in 128.81ms", "request_id": "51d2e1bf-8473-4056-a4c1-53b74699c21b", "status_code": 201, "duration_ms": 128.81, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.391Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0 -> 201 in 53.63ms", "request_id": "0ff950ab-4263-4ff9-9135-0362119506a2", "status_code": 201, "duration_ms": 53.63, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.391Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0 -> 201 in 53.51ms", "request_id": "d8a80e4c-aac5-4a46-8b6f-dbf192c5961d", "status_code": 201, "duration_ms": 53.51, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.391Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0 -> 201 in 53.04ms", "request_id": "c460d1db-e6bb-441e-b095-204ece1e0bc6", "status_code": 201, "duration_ms": 53.04, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.465Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/rebal/object-4.dat -> 201 in 126.49ms", "request_id": "ad2ef9c2-9f9b-4e90-8979-d8e3ee3bd5b6", "status_code": 201, "duration_ms": 126.49, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.516Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/c52f3154-2330-4e40-81a7-b77ac8813ba3/0 -> 201 in 47.31ms", "request_id": "d23d297d-ed08-49b0-b0da-18ed8ac9fe82", "status_code": 201, "duration_ms": 47.31, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.516Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/c52f3154-2330-4e40-81a7-b77ac8813ba3/0 -> 201 in 47.31ms", "request_id": "b21601fa-ed87-465c-9c7b-faedf873347c", "status_code": 201, "duration_ms": 47.31, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.516Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/c52f3154-2330-4e40-81a7-b77ac8813ba3/0 -> 201 in 47.04ms", "request_id": "2e21d332-d2de-4dbd-8f7c-5671e026bc3b", "status_code": 201, "duration_ms": 47.04, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.634Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/rebal/object-5.dat -> 201 in 167.03ms", "request_id": "b442e132-8129-4c4c-a36e-4c685bb9b7f1", "status_code": 201, "duration_ms": 167.03, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.768Z", "level": "INFO", "logger": "vault", "message": "Admin added storage node: storage-7 (http://storage-7:8001, zone=us-east-1a)"}
+{"timestamp": "2026-09-26T00:13:35.768Z", "level": "INFO", "logger": "vault", "message": "POST /v1/admin/nodes -> 201 in 131.46ms", "request_id": "79a7dc3c-7a08-407b-9d71-43efebb6c37a", "status_code": 201, "duration_ms": 131.46, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.806Z", "level": "INFO", "logger": "vault.rebalance", "message": "Starting background rebalance loop (2 tasks queued)"}
+{"timestamp": "2026-09-26T00:13:35.806Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0"}
+{"timestamp": "2026-09-26T00:13:35.816Z", "level": "INFO", "logger": "vault", "message": "POST /v1/admin/rebalance -> 202 in 44.28ms", "request_id": "9537400a-ba5a-471b-a52e-845c19ac13ec", "status_code": 202, "duration_ms": 44.28, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.817Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0 -> 403 in 3.77ms", "request_id": "c42e275c-d658-4ead-9132-e3dd22e549dc", "status_code": 403, "duration_ms": 3.77, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.817Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0"}
+{"timestamp": "2026-09-26T00:13:35.817Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 4.67ms", "request_id": "715a6ce3-5310-4f85-becb-0e36c363678f", "status_code": 200, "duration_ms": 4.67, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.817Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0 -> 403 in 3.11ms", "request_id": "0419ba53-0186-4f09-86a6-a263d9fd6ab9", "status_code": 403, "duration_ms": 3.11, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.826Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0"}
+{"timestamp": "2026-09-26T00:13:35.826Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/27e57b9f-3afd-40f9-ad2c-cb384c12dbbe/0 -> 403 in 2.31ms", "request_id": "dd808966-3432-4da3-a2b6-661160f298ca", "status_code": 403, "duration_ms": 2.31, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.849Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0"}
+{"timestamp": "2026-09-26T00:13:35.849Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0 -> 403 in 3.37ms", "request_id": "f93d0149-0103-4f47-8652-fe1a4635bfe7", "status_code": 403, "duration_ms": 3.37, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.856Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0"}
+{"timestamp": "2026-09-26T00:13:35.856Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0 -> 403 in 1.18ms", "request_id": "6e2de196-d9a5-477b-a9c1-1aa48b609359", "status_code": 403, "duration_ms": 1.18, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.856Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0"}
+{"timestamp": "2026-09-26T00:13:35.856Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/79ca795e-7de0-439b-98de-8715e2ecfa11/0 -> 403 in 1.01ms", "request_id": "bb0b0c6c-dfd3-4e37-a285-89300be391e7", "status_code": 403, "duration_ms": 1.01, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:35.885Z", "level": "INFO", "logger": "vault.rebalance", "message": "Rebalance finished: 0 verified, 2 failed, 0 bytes moved"}
+{"timestamp": "2026-09-26T00:13:35.918Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.00ms", "request_id": "e4c24a52-a1f9-41d6-b961-a8f3b786fa35", "status_code": 200, "duration_ms": 1.0, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.034Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.90ms", "request_id": "b9330c60-cdcc-439b-86f6-fcbd48a842b1", "status_code": 200, "duration_ms": 0.9, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.152Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.87ms", "request_id": "2b1233a1-b636-4804-8505-3b6323c6f0c8", "status_code": 200, "duration_ms": 0.87, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.264Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.84ms", "request_id": "3abfc9d9-7e90-45bd-8b78-b5e7d08ed397", "status_code": 200, "duration_ms": 0.84, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.368Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.89ms", "request_id": "445358fc-49af-45fe-b913-0e720560de42", "status_code": 200, "duration_ms": 0.89, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.484Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.94ms", "request_id": "bdf5f6e6-042d-4dd0-845f-cfe99ee9c2a8", "status_code": 200, "duration_ms": 0.94, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.601Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.39ms", "request_id": "95a8858b-d55b-4473-bf59-02396f12a3de", "status_code": 200, "duration_ms": 1.39, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.717Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.93ms", "request_id": "055cd6bd-7eb9-41de-bcf9-b758d07ef5b8", "status_code": 200, "duration_ms": 0.93, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.836Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.46ms", "request_id": "4e57f54b-4cb7-4fe7-9dd3-3363c22565cd", "status_code": 200, "duration_ms": 1.46, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:36.942Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.25ms", "request_id": "20bf0a31-071d-4c15-a02c-2c37b260cbea", "status_code": 200, "duration_ms": 1.25, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.043Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.77ms", "request_id": "c2c68154-161a-41cb-aef0-251d7e7cab57", "status_code": 200, "duration_ms": 0.77, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.147Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.71ms", "request_id": "b735b67f-e9f6-4f8c-939b-ab1d2b3c703e", "status_code": 200, "duration_ms": 0.71, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.251Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.15ms", "request_id": "41e53e48-995b-4c78-9a83-54c9f8fdf770", "status_code": 200, "duration_ms": 1.15, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.368Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.53ms", "request_id": "322971d2-09b8-4cb8-b467-c281ff0e73b1", "status_code": 200, "duration_ms": 1.53, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.484Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.93ms", "request_id": "60b916e0-e5fd-43be-8400-7c09ed0e7d83", "status_code": 200, "duration_ms": 0.93, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.590Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.75ms", "request_id": "d9bf4a8f-7e33-451c-871a-e5a73529c998", "status_code": 200, "duration_ms": 0.75, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.700Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.51ms", "request_id": "e4a9d04d-3c49-4532-a8ab-6033adc9aaeb", "status_code": 200, "duration_ms": 1.51, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.812Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.78ms", "request_id": "ade1edd9-2d2e-46cd-9296-4c7689738e2f", "status_code": 200, "duration_ms": 0.78, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:37.917Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.94ms", "request_id": "1571fd02-76a6-457e-848c-2b8ff6416b2c", "status_code": 200, "duration_ms": 0.94, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.035Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.12ms", "request_id": "92df7035-79a4-45de-b480-04c583c740bf", "status_code": 200, "duration_ms": 1.12, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.148Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.19ms", "request_id": "e159d2ca-83f5-455d-ab4e-0a2479c843e1", "status_code": 200, "duration_ms": 1.19, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.264Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.52ms", "request_id": "b70da655-e984-49cd-a93c-d14a59e46833", "status_code": 200, "duration_ms": 1.52, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.372Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.77ms", "request_id": "49174fde-baa3-4eea-9592-11a3c1c41cc2", "status_code": 200, "duration_ms": 0.77, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.501Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.65ms", "request_id": "c9533899-9f45-486d-9e6b-754a1dd1fb3b", "status_code": 200, "duration_ms": 1.65, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.606Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.71ms", "request_id": "43fa4888-2473-4cf0-838a-db7a1ec5d6f6", "status_code": 200, "duration_ms": 0.71, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.722Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.70ms", "request_id": "3db98e4b-20db-4f98-9aad-bcafb2156f70", "status_code": 200, "duration_ms": 0.7, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.822Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.74ms", "request_id": "062e9d02-3a7a-4881-9d2a-abf81ab9de65", "status_code": 200, "duration_ms": 0.74, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:38.932Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.25ms", "request_id": "d2be5652-394b-4d6e-90b1-a8b125b147af", "status_code": 200, "duration_ms": 1.25, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.048Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.54ms", "request_id": "2362bf1f-3899-4660-b341-a760f914a0f3", "status_code": 200, "duration_ms": 1.54, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.150Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.56ms", "request_id": "d46b70bc-9c3f-44ae-a8b3-873593d21f53", "status_code": 200, "duration_ms": 1.56, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.256Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.74ms", "request_id": "b05154f0-0bb1-489a-aa5b-ec36ea1e8729", "status_code": 200, "duration_ms": 0.74, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.373Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.71ms", "request_id": "eda9ff67-9a16-4366-8911-e0bb8f444800", "status_code": 200, "duration_ms": 0.71, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.501Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.23ms", "request_id": "d365bfe8-ddf2-4644-9e3c-b139d3ab68f1", "status_code": 200, "duration_ms": 1.23, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.618Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.94ms", "request_id": "549cdc18-7e8b-4a32-855f-19a81893045f", "status_code": 200, "duration_ms": 0.94, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.725Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.76ms", "request_id": "fdc0c2d2-9df7-4fa2-8254-8734f186b775", "status_code": 200, "duration_ms": 0.76, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.832Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.86ms", "request_id": "f56f9858-4e20-4cbc-80fb-4743c178012b", "status_code": 200, "duration_ms": 0.86, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:39.935Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.13ms", "request_id": "835716d7-bb36-4809-87ae-688cc98c13e2", "status_code": 200, "duration_ms": 1.13, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.057Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.79ms", "request_id": "40b3ce2d-8133-4734-95b9-bf25d6b62c65", "status_code": 200, "duration_ms": 0.79, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.176Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.73ms", "request_id": "08e6fae9-83dd-44f7-8d17-092197d866ae", "status_code": 200, "duration_ms": 0.73, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.285Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.74ms", "request_id": "4901d0ab-3480-47e5-8da9-c30011383f58", "status_code": 200, "duration_ms": 0.74, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.396Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.81ms", "request_id": "f8bda1b1-01df-413f-ba96-ebef09902721", "status_code": 200, "duration_ms": 0.81, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.501Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.22ms", "request_id": "75ef1065-de4e-408f-9ea0-7ab24ab497df", "status_code": 200, "duration_ms": 1.22, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.618Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.20ms", "request_id": "a211645a-c070-4a88-b0b5-ee26811106c1", "status_code": 200, "duration_ms": 1.2, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.741Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.44ms", "request_id": "bc64b62d-7df6-43a7-8230-88587f360588", "status_code": 200, "duration_ms": 1.44, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.856Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.76ms", "request_id": "c363b265-2890-4fae-8b67-397aa1395c3a", "status_code": 200, "duration_ms": 0.76, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:40.975Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.71ms", "request_id": "e524bcb8-aeb6-4c01-b92e-2587c15e3d34", "status_code": 200, "duration_ms": 0.71, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.097Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.26ms", "request_id": "eb29ac11-e4fe-460f-958b-1172949fbcab", "status_code": 200, "duration_ms": 1.26, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.222Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.75ms", "request_id": "6332cb6b-a221-4dd7-baff-3c13a622a968", "status_code": 200, "duration_ms": 0.75, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.325Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.91ms", "request_id": "c17ce090-7fdd-4e27-a583-6d16055aa091", "status_code": 200, "duration_ms": 0.91, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.432Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.96ms", "request_id": "2e1ade43-c05c-44d5-881e-0452b2f48406", "status_code": 200, "duration_ms": 0.96, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.541Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.69ms", "request_id": "e1aaf34c-a9fa-44ed-8dbb-cd8ef74e98ff", "status_code": 200, "duration_ms": 0.69, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.650Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.27ms", "request_id": "3aa01ed3-abf8-4fec-905a-733f54aa6426", "status_code": 200, "duration_ms": 1.27, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.779Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.70ms", "request_id": "0fcdd867-d3b7-43cd-9fe0-0ae6bcdaf6d2", "status_code": 200, "duration_ms": 0.7, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:41.899Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.02ms", "request_id": "e3c5f9da-4f39-49ae-a24d-64eeb21c86ef", "status_code": 200, "duration_ms": 1.02, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.006Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.72ms", "request_id": "56c5e4fc-4cf6-4f9c-a79e-617b28f08ef8", "status_code": 200, "duration_ms": 0.72, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.117Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.68ms", "request_id": "258aa347-fc4f-4c62-9187-943a770a031c", "status_code": 200, "duration_ms": 0.68, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.217Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.91ms", "request_id": "900b44db-b295-4e32-a2c4-955cb7f810d0", "status_code": 200, "duration_ms": 0.91, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.323Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.88ms", "request_id": "298efa03-0b1c-456f-95b9-9c17aa9029ef", "status_code": 200, "duration_ms": 0.88, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.433Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.65ms", "request_id": "3e0e86fe-d0a7-4469-8127-eabc127033f8", "status_code": 200, "duration_ms": 1.65, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.549Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.09ms", "request_id": "b3a7a753-8de6-4142-b92f-19a93c89fa4d", "status_code": 200, "duration_ms": 1.09, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.664Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.37ms", "request_id": "6a98e266-94d3-4eb1-a696-eb70437f3000", "status_code": 200, "duration_ms": 1.37, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.767Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.29ms", "request_id": "ae620e7c-e6d5-465d-a303-2c9c8b1945b7", "status_code": 200, "duration_ms": 1.29, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.878Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.82ms", "request_id": "9f1687d9-a94f-435b-bbb0-14fda93b3a12", "status_code": 200, "duration_ms": 0.82, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:42.985Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.70ms", "request_id": "de1d4b3f-360a-42c4-8e85-df62f7745903", "status_code": 200, "duration_ms": 0.7, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.091Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.72ms", "request_id": "4ffad2f8-4759-486e-ab32-25b39eac3e3b", "status_code": 200, "duration_ms": 0.72, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.192Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.44ms", "request_id": "9d25be17-29e2-46a4-9219-a622f8de532d", "status_code": 200, "duration_ms": 1.44, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.314Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.01ms", "request_id": "3e5ea726-7aa3-4916-872e-32b6b561c230", "status_code": 200, "duration_ms": 1.01, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.437Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.72ms", "request_id": "b47a34cb-4dbe-43d8-82b8-921801a7f7ee", "status_code": 200, "duration_ms": 0.72, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.539Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 1.18ms", "request_id": "9b3269e5-fc0a-4d36-8b6b-a95293c3a3f9", "status_code": 200, "duration_ms": 1.18, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.652Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.93ms", "request_id": "fc63ba16-4d1a-4181-a3ad-b020e95889fd", "status_code": 200, "duration_ms": 0.93, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.756Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 0.77ms", "request_id": "aff3d9e2-071d-4967-a6f1-cbf841c54752", "status_code": 200, "duration_ms": 0.77, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:43.875Z", "level": "INFO", "logger": "vault", "message": "GET /v1/admin/rebalance/status -> 200 in 6.02ms", "request_id": "26f33264-2ed1-4cbb-9184-bc0dacc70b3f", "status_code": 200, "duration_ms": 6.02, "client_ip": "127.0.0.1"}
+_________________ test_resumed_rebalance_after_worker_restart _________________
+
+rebalance_cluster_env = {'cluster': ClusterConfig(cluster_id='vault-rebalance-cluster', metadata_nodes=[], storage_nodes=[StorageNodeConfig(no..., data_write_quorum=2, data_read_quorum=1, data_fragments=None, parity_fragments=None, minimum_distinct_zones=3)}, ...}
+
+    @pytest.mark.asyncio
+    async def test_resumed_rebalance_after_worker_restart(rebalance_cluster_env):
+        """
+        Test that rebalance can be resumed after a worker restart, picking up
+        remaining migrations without repeating already completed ones.
+        """
+        env = rebalance_cluster_env
+        gw_client = httpx.AsyncClient(transport=env["gateway_transport"], base_url="http://gateway:8000")
+    
+        # Add storage-7 app
+        node_7_dir = env["tmp_path"] / "storage-7"
+        node_7_settings = VaultSettings(data_dir=node_7_dir, chunk_size_bytes=8 * 1024 * 1024)
+        storage_app_7 = create_vault_app(node_7_settings)
+        env["transport"].add_node_transport("storage-7", httpx.ASGITransport(app=storage_app_7))
+    
+        for i in range(4):
+            put_resp = await gw_client.put(
+                f"/v1/objects/test-bucket/resume-{i}.dat",
+                content=f"Payload for resume test {i}".encode() * 50,
+                headers={"Idempotency-Key": f"resume-put-{i}", "X-Vault-Policy": "hot"}
+            )
+            assert put_resp.status_code == 201
+    
+        await gw_client.post("/v1/admin/nodes", json={
+            "node_id": "storage-7",
+            "url": "http://storage-7:8001",
+            "region": "us-east-1",
+            "zone": "us-east-1a",
+            "active": True,
+            "capacity_weight": 3.0,
+        })
+    
+        # Simulate worker restart by creating a fresh RebalanceWorker instance
+        new_worker = RebalanceWorker(
+            cluster=env["service"].cluster,
+            metadata_raft=env["raft_sm"],
+            policies=env["policies"],
+            http_client=env["storage_http_client"],
+        )
+        env["service"].rebalance_worker = new_worker
+    
+        # Resume rebalance
+        status_obj = await new_worker.resume_rebalance()
+        assert status_obj.status in ("running", "completed")
+    
+        start = time.time()
+        while time.time() - start < 6.0:
+            if new_worker.get_status().status == "completed":
+                break
+            await asyncio.sleep(0.05)
+    
+>       assert new_worker.get_status().status == "completed"
+E       AssertionError: assert 'failed' == 'completed'
+E         
+E         - completed
+E         + failed
+
+tests\integration\test_membership_rebalance.py:482: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": "2026-09-26T00:13:51.375Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/43c07217-c4a8-4c44-b673-5724facfddf4/0 -> 201 in 80.26ms", "request_id": "74bea005-d45e-4687-ae1b-e45090550178", "status_code": 201, "duration_ms": 80.26, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.375Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/43c07217-c4a8-4c44-b673-5724facfddf4/0 -> 201 in 80.21ms", "request_id": "35b0f1ff-eb25-413f-95c0-2c23a020f53b", "status_code": 201, "duration_ms": 80.21, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.375Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/43c07217-c4a8-4c44-b673-5724facfddf4/0 -> 201 in 80.14ms", "request_id": "f5cc0b3f-00c8-41b7-be72-9c16af07878d", "status_code": 201, "duration_ms": 80.14, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.472Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/resume-0.dat -> 201 in 188.71ms", "request_id": "b5b703b9-75c3-4fd3-9df4-3638cc1bfbb0", "status_code": 201, "duration_ms": 188.71, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.524Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0 -> 201 in 46.69ms", "request_id": "d3e17377-5c51-4ae0-8e73-dc917f84292f", "status_code": 201, "duration_ms": 46.69, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.524Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0 -> 201 in 45.44ms", "request_id": "7b3c0f38-7d39-4a81-82e4-7a6e7d9fdc26", "status_code": 201, "duration_ms": 45.44, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.524Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0 -> 201 in 44.99ms", "request_id": "d71bc109-c656-4560-b7ce-bc8f9701e13f", "status_code": 201, "duration_ms": 44.99, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.595Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/resume-1.dat -> 201 in 121.59ms", "request_id": "71138e4a-7430-4e77-a6f0-09998773d3f5", "status_code": 201, "duration_ms": 121.59, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.764Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0 -> 201 in 164.01ms", "request_id": "c0b0a41f-2de9-48d6-849d-4a06a28abda0", "status_code": 201, "duration_ms": 164.01, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.764Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0 -> 201 in 164.12ms", "request_id": "6b4c1e71-1d66-447e-938e-19f11a2eb1ed", "status_code": 201, "duration_ms": 164.12, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.764Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0 -> 201 in 163.94ms", "request_id": "2dfdda6e-4f29-4e1a-bf85-1026899952ea", "status_code": 201, "duration_ms": 163.94, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:51.844Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/resume-2.dat -> 201 in 246.74ms", "request_id": "a1730bb0-7aeb-4660-bfb1-8eedd9e95b4a", "status_code": 201, "duration_ms": 246.74, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.058Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/0d6c224a-a27d-4834-9c6a-5605d679fa22/0 -> 201 in 206.72ms", "request_id": "71e8726d-1ca6-462b-986b-abac02f8e42b", "status_code": 201, "duration_ms": 206.72, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.058Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/0d6c224a-a27d-4834-9c6a-5605d679fa22/0 -> 201 in 206.74ms", "request_id": "35dd55d4-f371-4028-87e7-b5a7da9b7e29", "status_code": 201, "duration_ms": 206.74, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.058Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/chunks/test-bucket/0d6c224a-a27d-4834-9c6a-5605d679fa22/0 -> 201 in 206.49ms", "request_id": "a3f6f306-e7d0-451c-ae67-1b91720e94f6", "status_code": 201, "duration_ms": 206.49, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.144Z", "level": "INFO", "logger": "vault", "message": "PUT /v1/objects/test-bucket/resume-3.dat -> 201 in 297.17ms", "request_id": "f132d67b-c378-4ddf-adc6-7f543a2a5204", "status_code": 201, "duration_ms": 297.17, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.272Z", "level": "INFO", "logger": "vault", "message": "Admin added storage node: storage-7 (http://storage-7:8001, zone=us-east-1a)"}
+{"timestamp": "2026-09-26T00:13:52.272Z", "level": "INFO", "logger": "vault", "message": "POST /v1/admin/nodes -> 201 in 124.77ms", "request_id": "621947e3-b1c4-409d-93cd-a6d41872e4cb", "status_code": 201, "duration_ms": 124.77, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.277Z", "level": "INFO", "logger": "vault.rebalance", "message": "Starting background rebalance loop (2 tasks queued)"}
+{"timestamp": "2026-09-26T00:13:52.283Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0"}
+{"timestamp": "2026-09-26T00:13:52.285Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0 -> 403 in 4.55ms", "request_id": "355c7b8e-659c-40cd-9a53-0dd8183f4259", "status_code": 403, "duration_ms": 4.55, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.285Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0"}
+{"timestamp": "2026-09-26T00:13:52.292Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0 -> 403 in 4.33ms", "request_id": "7059c21d-3d15-4dc2-90d6-6c598972d044", "status_code": 403, "duration_ms": 4.33, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.295Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0"}
+{"timestamp": "2026-09-26T00:13:52.295Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/346ef8ad-9eac-463c-82f1-4ac3d1860ff4/0 -> 403 in 4.18ms", "request_id": "d02e8fb8-a111-47ae-8362-36a41a3387ae", "status_code": 403, "duration_ms": 4.18, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.420Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0"}
+{"timestamp": "2026-09-26T00:13:52.420Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0 -> 403 in 2.67ms", "request_id": "c21c9467-eff3-4198-84bc-46ccfdfe71f7", "status_code": 403, "duration_ms": 2.67, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.420Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0"}
+{"timestamp": "2026-09-26T00:13:52.420Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0 -> 403 in 1.07ms", "request_id": "d12c33ee-8c82-4b2c-bb7f-7866bf553eb5", "status_code": 403, "duration_ms": 1.07, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.420Z", "level": "WARNING", "logger": "vault", "message": "Auth token validation failed for GET /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0"}
+{"timestamp": "2026-09-26T00:13:52.430Z", "level": "INFO", "logger": "vault", "message": "GET /v1/chunks/test-bucket/c3418725-9dc5-4f66-831b-0aec1b0c0322/0 -> 403 in 1.42ms", "request_id": "a82dbd07-427c-49d4-a950-9d02020c8e62", "status_code": 403, "duration_ms": 1.42, "client_ip": "127.0.0.1"}
+{"timestamp": "2026-09-26T00:13:52.525Z", "level": "INFO", "logger": "vault.rebalance", "message": "Rebalance finished: 0 verified, 2 failed, 0 bytes moved"}
+=========================== short test summary info ===========================
+FAILED tests/integration/test_archive_policy.py::test_archive_automatic_background_fragment_repair
+FAILED tests/integration/test_consistency_versioning.py::test_replica_inventory_audit_convergence_states
+FAILED tests/integration/test_integrity_repair.py::test_read_repair_enqueues_and_restores_replica
+FAILED tests/integration/test_integrity_repair.py::test_cluster_audit_and_prioritized_repair_workflow
+FAILED tests/integration/test_membership_rebalance.py::test_rebalance_trigger_and_rendezvous_placement_matching
+FAILED tests/integration/test_membership_rebalance.py::test_resumed_rebalance_after_worker_restart
+============= 6 failed, 108 passed, 7 skipped in 95.95s (0:01:35) =============
