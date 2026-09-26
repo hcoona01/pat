@@ -25,6 +25,7 @@ try:
         metrics_enabled: bool = True
 
         retention_period_seconds: int = 86400  # 24 hours
+        internal_auth_required: bool = True
 
 except ImportError:
     from pydantic import BaseModel, Field
@@ -44,8 +45,8 @@ except ImportError:
         metrics_enabled: bool = Field(default_factory=lambda: os.getenv("VAULT_METRICS_ENABLED", "true").lower() == "true")
 
         retention_period_seconds: int = Field(default_factory=lambda: int(os.getenv("VAULT_RETENTION_PERIOD_SECONDS", "86400")))
+        internal_auth_required: bool = Field(default_factory=lambda: os.getenv("VAULT_INTERNAL_AUTH_REQUIRED", "true").lower() == "true")
 
 
 # Default singleton instance
 settings = VaultSettings()
-

@@ -1,13 +1,15 @@
 import asyncio
 import hashlib
+import os
 import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
-from fastapi import FastAPI, Header, HTTPException, Request, Response, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse, Response as PlainResponse, StreamingResponse
 
 from vault_core.hashing import sha256_bytes
+from vault_core.auth import verify_auth_token
 from vault_core.logging_config import StructuredLoggingMiddleware, logger
 from vault_core.manifest import ChunkInfo, ObjectManifest
 from vault_core.metadata_db import MetadataRepository
@@ -61,6 +63,13 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
     app.state.scanner = scanner
     app.state.settings = cfg
 
+    async def require_internal_auth(
+        token: Optional[str] = Header(None, alias="X-Vault-Auth-Token"),
+    ) -> None:
+        """Authenticate all storage-node control and chunk data-plane requests."""
+        if cfg.internal_auth_required and not verify_auth_token(token, cfg.secret_key):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authentication token")
+
     @app.get("/metrics")
     async def metrics_endpoint() -> Response:
         """Prometheus metrics endpoint."""
@@ -68,12 +77,12 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
         return Response(content=body, media_type=content_type)
 
     @app.post("/v1/admin/scan")
-    async def trigger_full_scan() -> dict:
+    async def trigger_full_scan(_: None = Depends(require_internal_auth)) -> dict:
         """Trigger an immediate full integrity scan across all chunks on this storage node."""
         return await asyncio.to_thread(scanner.scan_once)
 
     @app.get("/v1/admin/scan/status")
-    async def scan_status() -> dict:
+    async def scan_status(_: None = Depends(require_internal_auth)) -> dict:
         """Inspect last integrity scan outcome."""
         return {
             "running": scanner._running,
@@ -198,7 +207,7 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
     # =========================================================================
 
     @app.get("/v1/node/health")
-    async def node_health() -> dict:
+    async def node_health(_: None = Depends(require_internal_auth)) -> dict:
         """Return storage node identity and health status."""
         return {
             "node_id": os.getenv("NODE_ID", "store-local"),
@@ -216,6 +225,7 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
         chunk_index: int,
         request: Request,
         expected_sha256: Optional[str] = Header(None, alias="X-Expected-SHA256"),
+        _: None = Depends(require_internal_auth),
     ) -> dict:
         """Atomically persist a single chunk on this storage node."""
         data = await request.body()
@@ -243,6 +253,7 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
         version_id: str,
         chunk_index: int,
         expected_sha256: Optional[str] = Header(None, alias="X-Expected-SHA256"),
+        _: None = Depends(require_internal_auth),
     ) -> Response:
         """Retrieve chunk bytes after verifying SHA-256 integrity."""
         # If expected_sha256 is not sent in header, try reading without expected check or verify against file
@@ -264,7 +275,7 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
         return PlainResponse(content=data, media_type="application/octet-stream")
 
     @app.head("/v1/chunks/{bucket}/{version_id}/{chunk_index:int}")
-    async def head_chunk(bucket: str, version_id: str, chunk_index: int) -> Response:
+    async def head_chunk(bucket: str, version_id: str, chunk_index: int, _: None = Depends(require_internal_auth)) -> Response:
         """Check if chunk exists on this storage node."""
         chunk_path = storage._chunk_path(bucket, version_id, chunk_index)
         if not chunk_path.is_file():
@@ -272,7 +283,7 @@ def create_vault_app(custom_settings: Optional[VaultSettings] = None) -> FastAPI
         return PlainResponse(headers={"Content-Length": str(chunk_path.stat().st_size)})
 
     @app.delete("/v1/chunks/{bucket}/{version_id}/{chunk_index:int}", status_code=status.HTTP_204_NO_CONTENT)
-    async def delete_chunk(bucket: str, version_id: str, chunk_index: int) -> Response:
+    async def delete_chunk(bucket: str, version_id: str, chunk_index: int, _: None = Depends(require_internal_auth)) -> Response:
         """Remove chunk from disk (used by GC and rebalance)."""
         chunk_path = storage._chunk_path(bucket, version_id, chunk_index)
         if chunk_path.is_file():

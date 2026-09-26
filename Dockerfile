@@ -9,9 +9,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml README.md ./
-RUN pip install --no-cache-dir -e .
+COPY apps ./apps
+COPY vault_core ./vault_core
+COPY config ./config
+RUN pip install --no-cache-dir -e . && \
+    python -c "import apps.gateway.main; import apps.storage_node.main; import apps.metadata_node.main"
 
-COPY . .
+COPY scripts ./scripts
+COPY docs ./docs
 
 ENV PYTHONPATH=/app
 EXPOSE 8000 8001 9001 9002

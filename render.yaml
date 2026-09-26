@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: vault-hackathon-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.cloudrun
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: off
+    envVars:
+      - key: VAULT_MODE
+        value: render-demo
+      - key: GIT_SHA
+        sync: false
