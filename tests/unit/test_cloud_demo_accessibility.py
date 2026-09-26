@@ -14,5 +14,8 @@ def test_dashboard_exposes_keyboard_and_screen_reader_semantics() -> None:
         'role="status"',
         'aria-live="polite"',
         ':focus-visible',
+        'prefers-reduced-motion:reduce',
+        'forced-colors:active',
+        'aria-hidden="true"',
     ):
         assert required in page.text
